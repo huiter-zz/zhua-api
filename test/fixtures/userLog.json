@@ -1,0 +1,42 @@
+[
+	{
+		"user": "585f758acb9c00775abdb091",
+		"type": "register",
+		"ip": "127.0.0.1",
+		"createdTime": 1482650342990
+	},
+	{
+		"user": "585f758acb9c00775abdb092",
+		"type": "register",
+		"ip": "127.0.0.1",
+		"createdTime": 1482650442990
+	},
+	{
+		"user": "585f758acb9c00775abdb093",
+		"type": "register",
+		"ip": "127.0.0.1",
+		"createdTime": 1482650542990
+	},
+	{
+		"user": "585f758acb9c00775abdb091",
+		"type": "login",
+		"ip": "127.0.0.1",
+		"createdTime": 1482650612990
+	},
+	{
+		"user": "585f758acb9c00775abdb091",
+		"type": "updateInfo",
+		"ip": "127.0.0.1",
+		"data": {
+			"name": "张三",
+			"phone": 13498762781
+		},
+		"createdTime": 1482650712990
+	},
+	{
+		"user": "585f758acb9c00775abdb091",
+		"type": "updatePass",
+		"ip": "127.0.0.1",
+		"createdTime": 1482650812990
+	}		
+]

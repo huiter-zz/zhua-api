@@ -1,0 +1,5 @@
+--require test/http
+--require should
+-R spec
+--ui bdd
+--timeout 600000

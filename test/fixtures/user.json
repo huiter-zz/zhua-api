@@ -1,0 +1,22 @@
+[
+	{
+		"_id": "585f758acb9c00775abdb091",
+		"email": "t1@zhua.pm",
+		"password": "123456",
+		"name": "张三",
+		"phone": 13498762781,	
+		"createdTime": 1482650342990
+	},
+	{
+		"_id": "585f758acb9c00775abdb092",
+		"email": "t2@zhua.pm",
+		"password": "123456",
+		"createdTime": 1482650442990
+	},
+	{
+		"_id": "585f758acb9c00775abdb093",
+		"email": "t3@zhua.pm",
+		"password": "123456",
+		"createdTime": 1482650542990
+	}		
+]

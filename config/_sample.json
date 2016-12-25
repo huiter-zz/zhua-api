@@ -1,0 +1,33 @@
+{
+	
+	"mongodb": {
+		"host": "localhost",
+		"database": "zhua"
+	},
+
+	"redis": {
+		"host": "localhost",
+		"port": 6379,
+		"db": 1
+	},
+
+	"bcrypt": {
+		"rounds": 1
+	},
+
+  	"crontab": {
+    	"nodeCommand": "NODE_ENV=development /usr/local/bin/node",
+	    "shellCommand": "/bin/bash",
+    	"logTidy": "10 0 * * *"
+  	},
+
+
+	 "logDir": "/logs",
+	 "logLevel": "debug",
+	 "logOutput": true,
+	 "logConfig": {
+
+	 },
+
+	"corsWhiteList":  ["\\.sensoro\\.com$"]
+}
