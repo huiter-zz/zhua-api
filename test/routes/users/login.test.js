@@ -2,9 +2,9 @@
 'use strict';
 
 const fixtures = require('../../load_fixtures');
-const UserLog = require('../../../model').UserLog;
+const Log = require('../../../model').Log;
 const users = fixtures.user;
-const userLogs = fixtures.userLog;
+const logs = fixtures.log;
 const _ = require('lodash');
 
 describe('POST /users/login', function() {
@@ -75,11 +75,11 @@ describe('POST /users/login', function() {
 			.set('x-real-ip', '134.45.45.45')
 			.expect(200, function(err, res) {
 				res.body.should.have.property('uid');
-				var logs = _.filter(userLogs, function(item) {
+				var _logs = _.filter(logs, function(item) {
 					return item.user === res.body.uid;
 				});
-				UserLog.find({user: res.body.uid}, function(err, docs) {
-					docs.length.should.equal(logs.length + 1);
+				Log.find({user: res.body.uid}, function(err, docs) {
+					docs.length.should.equal(_logs.length + 1);
 					docs[0].type.should.equal('login');
 					docs[0].ip.should.equal('127.0.0.1');
 					http.get('/users/me')
@@ -100,11 +100,11 @@ describe('POST /users/login', function() {
 			.set('x-real-ip', '134.45.45.45')
 			.expect(200, function(err, res) {
 				res.body.should.have.property('uid');
-				var logs = _.filter(userLogs, function(item) {
+				var _logs = _.filter(logs, function(item) {
 					return item.user === res.body.uid;
 				});
-				UserLog.find({user: res.body.uid}, function(err, docs) {
-					docs.length.should.equal(logs.length + 1);
+				Log.find({user: res.body.uid}, function(err, docs) {
+					docs.length.should.equal(_logs.length + 1);
 					docs[0].type.should.equal('login');
 					docs[0].ip.should.equal('127.0.0.1');
 					http.get('/users/me')

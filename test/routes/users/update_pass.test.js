@@ -2,9 +2,9 @@
 'use strict';
 
 const fixtures = require('../../load_fixtures');
-const UserLog = require('../../../model').UserLog;
+const Log = require('../../../model').Log;
 const users = fixtures.user;
-const userLogs = fixtures.userLog;
+const logs = fixtures.log;
 const _ = require('lodash');
 
 describe('PUT /users/me/password', function() {
@@ -102,13 +102,13 @@ describe('PUT /users/me/password', function() {
 			.send({oldPassword: users[0].password, newPassword: '987654321'})
 			.expect(200, function(err, res) {
 				res.body.result.should.equal('success');
-				UserLog.find({
+				Log.find({
 					user: users[0]._id
 				}, function(err, docs) {
-					var logs = _.filter(userLogs, function(item) {
+					var _logs = _.filter(logs, function(item) {
 						return item.user === users[0]._id;
 					});
-					docs.length.should.equal(logs.length + 1);
+					docs.length.should.equal(_logs.length + 1);
 					docs[0].type.should.equal('updatePass');
 					docs[0].ip.should.equal('127.0.0.1');
 					done();

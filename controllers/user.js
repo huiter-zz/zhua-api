@@ -1,6 +1,6 @@
 const _ = require('lodash');
 const User = require('../model').User;
-const UserLog = require('../model').UserLog;
+const Log = require('../model').Log;
 const errorWrapper = require('../utils').errorWrapper;
 
 const emailReg = /^([\w-_]+(?:\.[\w-_]+)*)@((?:[a-z0-9]+(?:-[a-zA-Z0-9]+)*)+\.[a-z]{2,6})(\.[a-z]{2,6})?$/i;
@@ -32,9 +32,9 @@ exports.register = function *(next) {
 
 	let user = yield User.create(data);
 
-	UserLog.create({
+	Log.create({
 		user: user._id,
-		type: UserLog.types('register'),
+		type: Log.types('register'),
 		ip: this.cleanIP
 	});
 
@@ -77,15 +77,15 @@ exports.login = function *(next) {
         return errFn();
 	}
 
-	let log = yield UserLog.find({
+	let log = yield Log.find({
 		user: user._id,
-		type: UserLog.types('login'),
+		type: Log.types('login'),
 	}).sort({createdTime: -1}).limit(1);
 	log = (log && log[0]) ? log[0].toJSON() : {};
 
-	UserLog.create({
+	Log.create({
 		user: user._id,
-		type: UserLog.types('login'),
+		type: Log.types('login'),
 		ip: this.cleanIP
 	});
 	user = user.toJSON();
@@ -145,9 +145,9 @@ exports.updateInfo = function *(next) {
 		updateDoc.phone = phone;
 	}
 	let ret = yield User.findByIdAndUpdate(user._id, updateDoc, {new: true});
-	UserLog.create({
+	Log.create({
 		user: user._id,
-		type: UserLog.types('updateInfo'),
+		type: Log.types('updateInfo'),
 		data: updateDoc,
 		ip: this.cleanIP
 	});
@@ -197,9 +197,9 @@ exports.resetPassword = function *(next) {
 	user.password = newPassword;
 	let ret = yield user.save();
 
-	UserLog.create({
+	Log.create({
 		user: user._id,
-		type: UserLog.types('updatePass'),
+		type: Log.types('updatePass'),
 		ip: this.cleanIP
 	});
 

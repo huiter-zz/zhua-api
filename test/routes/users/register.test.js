@@ -2,7 +2,7 @@
 'use strict';
 
 const fixtures = require('../../load_fixtures');
-const UserLog = require('../../../model').UserLog;
+const Log = require('../../../model').Log;
 
 
 
@@ -75,7 +75,7 @@ describe('POST /users/register', function() {
 			.expect(200, function(err, res) {
 				res.body.should.have.property('uid');
 				console.log(res.body);
-				UserLog.find({user: res.body.uid}, function(err, docs) {
+				Log.find({user: res.body.uid}, function(err, docs) {
 					docs.length.should.equal(1);
 					docs[0].type.should.equal('register');
 					docs[0].ip.should.equal('127.0.0.1');

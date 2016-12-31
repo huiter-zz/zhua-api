@@ -2,9 +2,9 @@
 'use strict';
 
 const fixtures = require('../../load_fixtures');
-const UserLog = require('../../../model').UserLog;
+const Log = require('../../../model').Log;
 const users = fixtures.user;
-const userLogs = fixtures.userLog;
+const logs = fixtures.log;
 const _ = require('lodash');
 
 describe('PUT /users/me', function() {
@@ -66,13 +66,13 @@ describe('PUT /users/me', function() {
 			.send({name: '李四11'})
 			.expect(200, function(err, res) {
 				res.body.name.should.equal('李四11');
-				UserLog.find({
+				Log.find({
 					user: res.body.uid
 				}, function(err, docs) {
-					var logs = _.filter(userLogs, function(item) {
+					var _logs = _.filter(logs, function(item) {
 						return item.user === res.body.uid;
 					});
-					docs.length.should.equal(logs.length + 1);
+					docs.length.should.equal(_logs.length + 1);
 					docs[0].type.should.equal('updateInfo');
 					docs[0].ip.should.equal('127.0.0.1');	
 					docs[0].data.name.should.equal('李四11');				
@@ -89,13 +89,13 @@ describe('PUT /users/me', function() {
 			.send({phone: 13519871212})
 			.expect(200, function(err, res) {
 				res.body.phone.should.equal(13519871212);
-				UserLog.find({
+				Log.find({
 					user: res.body.uid
 				}, function(err, docs) {
-					var logs = _.filter(userLogs, function(item) {
+					var _logs = _.filter(logs, function(item) {
 						return item.user === res.body.uid;
 					});
-					docs.length.should.equal(logs.length + 1);
+					docs.length.should.equal(_logs.length + 1);
 					docs[0].type.should.equal('updateInfo');
 					docs[0].ip.should.equal('127.0.0.1');	
 					docs[0].data.phone.should.equal(13519871212);				

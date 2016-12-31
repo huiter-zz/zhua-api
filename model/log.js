@@ -5,20 +5,26 @@ const bcrypt = require('bcrypt');
 const config = require('config');
 const _ = require('lodash');
 
+const types = {
+  register: 'register',
+  login: 'login',
+  updateInfo: 'updateInfo',
+  updatePass: 'updatePass',
+  addPage: 'addPage',
+  updatePage: 'updatePage',
+  delPage: 'delPage'
+};
+
+const typeArray = _.values(types);
+
 const schema = module.exports = new mongoose.Schema({
   user: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true},
-  type: {type: String, enum: ['register', 'login', 'updateInfo', 'updatePass'], required: true},
+  type: {type: String, enum: typeArray, required: true},
   ip: String,
   data: {},
   createdTime: {type: Date, default: Date.now }
 });
 
-const types = {
-  register: 'register',
-  login: 'login',
-  updateInfo: 'updateInfo',
-  updatePass: 'updatePass'
-}
 schema.static('types', function (type) {
   return types[type];
 });
