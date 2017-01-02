@@ -3,7 +3,7 @@
 
 const fixtures = require('../../load_fixtures');
 const Log = require('../../../model').Log;
-
+const users = fixtures.user;
 
 
 describe('POST /users/register', function() {
@@ -62,6 +62,19 @@ describe('POST /users/register', function() {
 			.expect(400, function(err, res) {
 				res.body.errcode.should.equal(40002);
 				res.body.errmsg.should.equal('密码不合法，密码长度必须大于 6 位并小于 50 位');
+				done();
+			});
+		});
+	});	
+
+	context('email exist', function() {
+		it('此邮件地址已存在，您可以直接登录或更换邮件地址', function(done) {
+			http.post('/users/register')
+			.send({email: users[0].email, password: '123456'})
+			.set('x-real-ip', '134.45.45.45')
+			.expect(400, function(err, res) {
+				res.body.errcode.should.equal(40006);
+				res.body.errmsg.should.equal('此邮件地址已存在，您可以直接登录或更换邮件地址');
 				done();
 			});
 		});

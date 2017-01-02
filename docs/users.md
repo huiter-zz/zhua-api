@@ -30,6 +30,7 @@
 	
 	{"errcode": 40001, "errmsg": "邮件地址不合法"}
 	{"errcode": 40002, "errmsg": "密码不合法，密码长度必须大于 6 位并小于 50 位"}
+	{"errcode": 40006, "errmsg": "此邮件地址已存在，您可以直接登录或更换邮件地址"}
 ```  
 
 
@@ -44,7 +45,8 @@
 ```
 	{
 		"email": "t1@zhua.pm", # 邮件地址
-		"password": "123456" # 密码
+		"password": "123456", # 密码
+		"remember": true # 是否保持登录状态(为 false 时 cookie 存储两个小时，为 true 时 cookie 存储 30 天)
 	}
 ```
 

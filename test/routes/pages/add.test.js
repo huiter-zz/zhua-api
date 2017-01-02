@@ -109,7 +109,6 @@ describe('POST /pages', function() {
 			.send(_data)
 			.expect(200, function(err, res) {
 				res.body.should.have.property('id');
-				res.body.del.should.equal(false);
 				res.body.page.should.equal(_data.page);
 				setTimeout(function() {
 					Log.find({
@@ -136,7 +135,6 @@ describe('POST /pages', function() {
 			.send(_data)
 			.expect(200, function(err, res) {
 				res.body.should.have.property('id');
-				res.body.del.should.equal(false);
 				res.body.page.should.equal(_data.page);
 				setTimeout(function() {
 					Log.find({

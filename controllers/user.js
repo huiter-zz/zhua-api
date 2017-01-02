@@ -4,6 +4,8 @@ const Log = require('../model').Log;
 const errorWrapper = require('../utils').errorWrapper;
 
 const emailReg = /^([\w-_]+(?:\.[\w-_]+)*)@((?:[a-z0-9]+(?:-[a-zA-Z0-9]+)*)+\.[a-z]{2,6})(\.[a-z]{2,6})?$/i;
+const loginCookieExpireTime = 2 * 60 * 60 * 1000;
+const loginCookieExpireRememberTime = 30 * 24 * 60 * 60 * 1000;
 
 const userInfoCheck = function *(data) {
 	data = data || {};
@@ -30,6 +32,20 @@ exports.register = function *(next) {
 
 	yield userInfoCheck(data);
 
+	let userIsExist = yield User.findOne({
+		emailLower: data.email.toLowerCase()
+	});
+
+	if (userIsExist) {
+		console.log(userIsExist);
+		this.status = 400;
+		this.body = {
+			errcode: 40006,
+			errmsg: '此邮件地址已存在，您可以直接登录或更换邮件地址'
+		};
+		return;
+	}
+
 	let user = yield User.create(data);
 
 	Log.create({
@@ -48,6 +64,7 @@ exports.login = function *(next) {
 	let data = this.request.body || {};
 	let email = data.email;
 	let password = data.password;
+	let remember = data.remember;
 
 	var self = this;
 	let errFn = function () {
@@ -94,7 +111,11 @@ exports.login = function *(next) {
 	this.session.uid = user.uid,
 	this.session.loginTime = user.loginTime;
 	this.session.lastLoginTime = user.lastLoginTime;
-	this.session.cookie.maxAge = 2 * 60 * 60 * 1000;
+	if (remember) {
+		this.session.cookie.maxAge = loginCookieExpireRememberTime;
+	} else {
+		this.session.cookie.maxAge = loginCookieExpireTime;
+	}
 	this.status = 200;
 	this.body = user;
 	return;

@@ -78,6 +78,19 @@ describe('POST /users/login', function() {
 				var _logs = _.filter(logs, function(item) {
 					return item.user === res.body.uid;
 				});
+				let cookie = res.headers['set-cookie'][0];
+				let cookieArr = cookie.split(';');
+				let expires;
+				_.each(cookieArr, function(s) {
+					s = s.trim();
+					let a = s.split('=');
+					if (a[0].trim() === 'expires') {
+						expires = a[1].trim();
+					}
+				});
+				let expiresTimestamp = new Date(expires).getTime();
+				let nowTime = Date.now();
+				(expiresTimestamp - nowTime).should.above(2 * 60 * 60 * 1000 - 1000).below(2 * 60 * 60 * 1000);
 				Log.find({user: res.body.uid}, function(err, docs) {
 					docs.length.should.equal(_logs.length + 1);
 					docs[0].type.should.equal('login');
@@ -92,6 +105,44 @@ describe('POST /users/login', function() {
 			});
 		});
 	});		
+
+	context('with right email and password and remember=true', function() {
+		it('success', function(done) {
+			http.post('/users/login')
+			.send({email: users[0].email, password: users[0].password, remember: true})
+			.set('x-real-ip', '134.45.45.45')
+			.expect(200, function(err, res) {
+				res.body.should.have.property('uid');
+				var _logs = _.filter(logs, function(item) {
+					return item.user === res.body.uid;
+				});
+				let cookie = res.headers['set-cookie'][0];
+				let cookieArr = cookie.split(';');
+				let expires;
+				_.each(cookieArr, function(s) {
+					s = s.trim();
+					let a = s.split('=');
+					if (a[0].trim() === 'expires') {
+						expires = a[1].trim();
+					}
+				});
+				let expiresTimestamp = new Date(expires).getTime();
+				let nowTime = Date.now();
+				(expiresTimestamp - nowTime).should.above(30 * 24 * 60 * 60 * 1000 - 1000).below(30 * 24 * 60 * 60 * 1000);
+				Log.find({user: res.body.uid}, function(err, docs) {
+					docs.length.should.equal(_logs.length + 1);
+					docs[0].type.should.equal('login');
+					docs[0].ip.should.equal('127.0.0.1');
+					http.get('/users/me')
+					.set('cookie', res.headers['set-cookie'])
+					.expect(200, function(err, result) {
+						result.body.uid.should.equal(res.body.uid);
+						done();
+					});
+				});
+			});
+		});
+	});
 
 	context('new user login', function() {
 		it('success', function(done) {

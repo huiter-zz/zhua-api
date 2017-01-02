@@ -94,7 +94,6 @@ describe('PUT /pages:/pid', function() {
 			.send(_data)
 			.expect(200, function(err, res) {
 				res.body.should.have.property('id');
-				res.body.del.should.equal(false);
 				setTimeout(function() {
 					Log.find({
 						user: users[0]._id,
@@ -120,7 +119,6 @@ describe('PUT /pages:/pid', function() {
 			.send(_data)
 			.expect(200, function(err, res) {
 				res.body.should.have.property('id');
-				res.body.del.should.equal(false);
 				setTimeout(function() {
 					Log.find({
 						user: users[0]._id,
