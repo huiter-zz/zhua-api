@@ -29,5 +29,12 @@
 
 	 },
 
+	"qiniu": {
+	    "bucketname": "",
+	    "ACCESS_KEY": "",
+	    "SECRET_KEY": "",
+	    "domain": ""
+	},
+
 	"corsWhiteList":  ["\\.sensoro\\.com$"]
 }

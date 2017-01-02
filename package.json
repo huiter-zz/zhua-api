@@ -33,6 +33,7 @@
     "lingo": "0.0.5",
     "lodash": "^4.13.1",
     "mongoose": "^4.5.5",
+    "qiniu": "^6.1.13",
     "require-directory": "^2.1.1"
   },
   "devDependencies": {

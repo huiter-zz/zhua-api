@@ -12,7 +12,8 @@ const types = {
   updatePass: 'updatePass',
   addPage: 'addPage',
   updatePage: 'updatePage',
-  delPage: 'delPage'
+  delPage: 'delPage',
+  uploadFile: 'uploadFile'
 };
 
 const typeArray = _.values(types);
