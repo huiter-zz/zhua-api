@@ -23,6 +23,13 @@ const userInfoCheck = function *(data) {
         }));
 	}
 
+	if (!data.nickname || data.nickname.length > 24) {
+        return Promise.reject(errorWrapper({
+            errcode: 40003,
+            errmsg: '用户昵称不能为空并且长度不能大于 24 位'
+        }));
+	}
+
 	return Promise.resolve(1);
 };
 
@@ -136,14 +143,15 @@ exports.getInfo = function *(next) {
 // 修改信息
 exports.updateInfo = function *(next) {
 	let data = this.request.body || {};
-	let name = data.name;
+	let nickname = data.nickname;
+	let avatar = data.avatar;
 	let phone = data.phone;
 
-	if (name && name.length > 40) {
+	if (nickname && nickname.length > 24) {
 		this.status = 400;
         this.body = errorWrapper({
             errcode: 40003,
-            errmsg: '用户名不合法，用户名长度不能大于 40 位'
+            errmsg: '用户昵称不能为空并且长度不能大于 24 位'
         });
         return;
 	}
@@ -159,11 +167,14 @@ exports.updateInfo = function *(next) {
 
 	let user = this.user;
 	let updateDoc = {};
-	if (name) {
-		updateDoc.name = name;		
+	if (nickname) {
+		updateDoc.nickname = nickname;		
 	}
 	if (phone) {
 		updateDoc.phone = phone;
+	}
+	if (avatar) {
+		updateDoc.avatar = avatar;
 	}
 	let ret = yield User.findByIdAndUpdate(user._id, updateDoc, {new: true});
 	Log.create({

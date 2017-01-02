@@ -20,14 +20,14 @@ describe('PUT /users/me', function() {
 		});
 	});
 		
-	context('name.length > 40', function() {
+	context('nickname.length > 24', function() {
 		it('用户名不合法，用户名长度不能大于 40 位', function(done) {
 			http.put('/users/me')
 			.auth(users[0].email, users[0].password)
-			.send({name: '12345678901234567890123456789012345678901234567890'})
+			.send({nickname: '12345678901234567890123456789012345678901234567890'})
 			.expect(400, function(err, res) {
 				res.body.errcode.should.equal(40003);
-				res.body.errmsg.should.equal('用户名不合法，用户名长度不能大于 40 位');
+				res.body.errmsg.should.equal('用户昵称不能为空并且长度不能大于 24 位');
 				done();
 			});
 		});
@@ -63,9 +63,9 @@ describe('PUT /users/me', function() {
 		it('success', function(done) {
 			http.put('/users/me')
 			.auth(users[0].email, users[0].password)
-			.send({name: '李四11'})
+			.send({nickname: '李四11'})
 			.expect(200, function(err, res) {
-				res.body.name.should.equal('李四11');
+				res.body.nickname.should.equal('李四11');
 				Log.find({
 					user: res.body.uid
 				}, function(err, docs) {
@@ -75,7 +75,7 @@ describe('PUT /users/me', function() {
 					docs.length.should.equal(_logs.length + 1);
 					docs[0].type.should.equal('updateInfo');
 					docs[0].ip.should.equal('127.0.0.1');	
-					docs[0].data.name.should.equal('李四11');				
+					docs[0].data.nickname.should.equal('李四11');				
 					done();
 				});
 			});
@@ -104,4 +104,30 @@ describe('PUT /users/me', function() {
 			});
 		});
 	});	
+
+
+	context('update avatar', function() {
+		it('success', function(done) {
+			http.put('/users/me')
+			.auth(users[0].email, users[0].password)
+			.send({phone: 13519871212, avatar: 'http://www.zhua.pm/a.jpg'})
+			.expect(200, function(err, res) {
+				res.body.phone.should.equal(13519871212);
+				res.body.avatar.should.equal('http://www.zhua.pm/a.jpg');
+				Log.find({
+					user: res.body.uid
+				}, function(err, docs) {
+					var _logs = _.filter(logs, function(item) {
+						return item.user === res.body.uid;
+					});
+					docs.length.should.equal(_logs.length + 1);
+					docs[0].type.should.equal('updateInfo');
+					docs[0].ip.should.equal('127.0.0.1');	
+					docs[0].data.phone.should.equal(13519871212);
+					docs[0].data.avatar.should.equal('http://www.zhua.pm/a.jpg');
+					done();
+				});
+			});
+		});
+	});		
 });

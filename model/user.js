@@ -11,8 +11,9 @@ var schema = module.exports = new mongoose.Schema({
   email: { type: String, unique: true, required: true},
   emailLower: {type: String, unique: true},
   password: {type: String, required: true},
+  nickname: {type: String, required: true},
+  avatar: {type: String},
   phone: {type: Number},
-  name: {type: String},
   createdTime: {type: Date, default: Date.now }
 });
 
