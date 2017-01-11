@@ -33,12 +33,29 @@ const pageDataCheck = function *(data, isUpdate) {
 			return false;
 		}
 	});
-
 	if (errmsg) {
         return Promise.reject(errorWrapper({
             errcode: 40023,
             errmsg: errmsg
         }));		
+	}
+
+
+	if (data.setting && data.setting.size) {
+		var sizeArr = data.setting.size.split('x');
+		if (sizeArr.length !== 2 || (!+sizeArr[0] || !+sizeArr[1])) {
+			return Promise.reject(errorWrapper({
+				errcode: 40025,
+				errmsg: '页面配置 size 格式不合法，格式应该为 1920x780 样式'
+			}));
+		}
+	}
+
+	if (data.setting && data.setting.delay && +data.setting.delay > 10) {
+		return Promise.reject(errorWrapper({
+			errcode: 40026,
+			errmsg: '页面抓取延时时间不能超过 10 秒'
+		}));
 	}
 
 	return Promise.resolve(1);
@@ -55,6 +72,9 @@ exports.add = function *(next) {
 
 	yield pageDataCheck(data);
 	data.user = user._id;
+	if (data.setting && data.setting.size) {
+		data.setting.size = [data.setting.size];
+	}
 	let page = yield Page.create(data);
 
 	Log.create({
@@ -78,13 +98,20 @@ exports.update = function *(next) {
 		if (_.isString(data.tags)) data.tags = [data.tags];
 		data.tags = _.uniq(_.compact(data.tags));
 	}
-
+	if (data.setting && data.setting.size) {
+		data.setting.size = [data.setting.size];
+	}
 	yield pageDataCheck(data, true);
 	let page = yield Page.findOneAndUpdate({
 		user: user._id,
 		_id: pid,
 		del: false
-	}, {$set: {tags: data.tags}}, {new: true});
+	}, {
+		$set: {
+			tags: data.tags,
+			setting: data.setting
+		}
+	}, {new: true});
 
 	if (!page) {
 		this.status = 400;

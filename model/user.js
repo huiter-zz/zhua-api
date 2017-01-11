@@ -14,6 +14,12 @@ var schema = module.exports = new mongoose.Schema({
   nickname: {type: String, required: true},
   avatar: {type: String},
   phone: {type: Number},
+  invitationCode: {type: String, unique: true, required: true}, // 自己的邀请码
+  referrals: {
+    user: { type: mongoose.Schema.Types.ObjectId, ref: 'User'}, // 引码对应的用户 ID
+    code: String, // 注册时填写的邀请码
+    isPay: {type: Boolean}
+  },
   createdTime: {type: Date, default: Date.now }
 });
 

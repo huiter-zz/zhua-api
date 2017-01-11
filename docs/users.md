@@ -11,7 +11,8 @@
 ```
 	{
 		"email": "t1@zhua.pm", # 邮件地址
-		"password": "123456" # 密码
+		"password": "123456", # 密码
+		"referralsCode": "20161225abcd" # 其他人的邀请码 
 	}
 ```
 
@@ -23,7 +24,13 @@
 	{
 		"uid": "585f758acb9c00775abdb091", # 用户 ID
 		"email": "t1@zhua.pm", # 邮件地址
-		"createTime": 1482650342990 # 注册时间
+		"createTime": 1482650342990, # 注册时间
+		"invitationCode": "20161225abce", # 自己的邀请码
+		"referrals": { #  若填写了邀请码，则此处是邀请人的信息
+			"user": "585f758acb9c00775abdb091", # 邀请人 UID
+			"code": "20161225abcd", # 注册时填写的邀请码
+			"isPay": false # 是否以给邀请用户赠送重置
+		}
 	}
 	
 	错误信息：

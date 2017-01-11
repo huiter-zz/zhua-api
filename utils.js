@@ -41,7 +41,7 @@ exports.mountIP = function *(next){
 /**
  * 生成一个随机字符串
  */
-var LETTER_NUMBER = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789_-';
+var LETTER_NUMBER = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
 exports.randomString = function (length) {
   	var text = '';
   	for (var i = 0; i < length; ++i) {

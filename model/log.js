@@ -6,14 +6,17 @@ const config = require('config');
 const _ = require('lodash');
 
 const types = {
-  register: 'register',
-  login: 'login',
-  updateInfo: 'updateInfo',
-  updatePass: 'updatePass',
-  addPage: 'addPage',
-  updatePage: 'updatePage',
-  delPage: 'delPage',
-  uploadFile: 'uploadFile'
+  register: 'register', // 注册
+  login: 'login', // 登录
+  updateInfo: 'updateInfo', // 修改新用户信息
+  updatePass: 'updatePass', // 修改密码
+  addPage: 'addPage', // 添加新页面
+  updatePage: 'updatePage', // 修改页面信息
+  delPage: 'delPage', // 删除页面
+  uploadFile: 'uploadFile', // 上传文件
+  cash: 'cash', // 现金充值
+  gift: 'gift', // 赠送充值
+  inviteGifts: 'inviteGifts' // 邀请别人注册赠送
 };
 
 const typeArray = _.values(types);

@@ -1,12 +1,19 @@
 const _ = require('lodash');
+const config = require('config');
 const User = require('../model').User;
 const Log = require('../model').Log;
-const errorWrapper = require('../utils').errorWrapper;
+const Property = require('../model').Property;
+const utils = require('../utils');
+const errorWrapper = utils.errorWrapper;
+const logger = utils.getLogger('user');
 
 const emailReg = /^([\w-_]+(?:\.[\w-_]+)*)@((?:[a-z0-9]+(?:-[a-zA-Z0-9]+)*)+\.[a-z]{2,6})(\.[a-z]{2,6})?$/i;
 const loginCookieExpireTime = 2 * 60 * 60 * 1000;
 const loginCookieExpireRememberTime = 30 * 24 * 60 * 60 * 1000;
+const registerGivenAmount = +config.registerGivenAmount || 1000; // 注册后赠送的充值金额
 
+
+// 用户信息字段检查
 const userInfoCheck = function *(data) {
 	data = data || {};
 	if (!emailReg.test(data.email)) {
@@ -33,6 +40,69 @@ const userInfoCheck = function *(data) {
 	return Promise.resolve(1);
 };
 
+// 生成用户邀请码
+const generateInvitationCode = function *(retryCount) {
+	retryCount = retryCount || 0;
+	retryCount++;
+	if (retryCount > 10) {
+		return Promise.reject(errorWrapper({
+			errcode: 40007,
+			errmsg: '生成邀请码出错'
+		}));
+	}
+	let invitationCode = moment().format('YYYYMMDD') + utils.randomString(4);
+	let isExist = yield User.findOne({invitationCode: invitationCode});
+	if (isExist) {
+		return yield generateInvitationCode.bind(null, retryCount);
+	} else {
+		return Promise.resolve(invitationCode);
+	}
+};
+
+// 初始化用户的财产 model
+const initUserProperty = function *(uid) {
+	return Property.create({user: uid});
+};
+
+// 修改用户余额
+const updateProperty = function *(uid, type, amount, ip) {
+	amount = +amount || 0;
+	var updateDoc = {};
+	logger.info('修改用户余额 type: %s uid: %s amount: %s', type, uid, amount);
+	if (type === 'cash') {
+		updateDoc = {
+			$inc: {
+				cash: amount
+			}
+		};
+	} else if (type === 'gift') {
+		updateDoc =	{
+			$inc: {
+				gift: amount
+			}
+		};
+	} else {
+		return Promise.reject(new Error('property type invalid'));
+	}
+	let ret = yield Property.findOneAndUpdate({
+		user: uid
+	}, updateDoc);
+	if (ret) {
+		logger.info('修改用户余额成功 type: %s uid: %s amount: %s', type, uid, amount);
+		Log.create({
+			user: uid,
+			type: Log.types(type),
+			ip: ip,
+			data: {
+				amount: amount
+			}
+		});
+	} else {
+		logger.error('修改用户余额失败 type: %s uid: %s amount: %s', type, uid, amount);
+	}
+	return Promise.resolve(!!ret);
+};
+
 // 注册
 exports.register = function *(next) {
 	let data = this.request.body || {};
@@ -44,7 +114,6 @@ exports.register = function *(next) {
 	});
 
 	if (userIsExist) {
-		console.log(userIsExist);
 		this.status = 400;
 		this.body = {
 			errcode: 40006,
@@ -53,13 +122,34 @@ exports.register = function *(next) {
 		return;
 	}
 
-	let user = yield User.create(data);
+	let invitationCode = yield generateInvitationCode();
+	data.invitationCode = invitationCode;
 
+	// 注册时若填写了他人的引荐码
+	if (data.referralsCode) {
+		let referrals = yield User.findOne({invitationCode: data.referralsCode});
+		if (referrals) {
+			data.referrals = {
+				user: referrals._id,
+				code: data.referralsCode,
+				isPay: false
+			};
+		}
+
+		delete data.referralsCode;
+	}
+
+	let user = yield User.create(data);
 	Log.create({
 		user: user._id,
 		type: Log.types('register'),
 		ip: this.cleanIP
 	});
+
+	// 初始化用户财产 model
+	yield initUserProperty(user._id);
+	// 充值
+	yield updateProperty(user._id, 'gift', registerGivenAmount, this.cleanIP);
 
     this.status = 200;
     this.body = user;

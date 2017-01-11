@@ -1,0 +1,20 @@
+[
+	{
+		"_id": "585f758acb9c00775abcd091",
+		"user": "585f758acb9c00775abdb091",
+		"cash": 1000,
+		"gift": 3000
+	},
+	{
+		"_id": "585f758acb9c00775abcd092",
+		"user": "585f758acb9c00775abdb092",
+		"cash": 2000,
+		"gift": 1000
+	},
+	{
+		"_id": "585f758acb9c00775abcd093",
+		"user": "585f758acb9c00775abdb093",
+		"cash": 0,
+		"gift": 1000
+	}		
+]

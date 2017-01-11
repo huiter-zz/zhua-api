@@ -28,3 +28,4 @@ bin/addr.json
 bin/getAddrFromWechat.js
 bin/*.txt
 bin/log*
+snapshot/*.png

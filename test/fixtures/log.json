@@ -6,11 +6,31 @@
 		"createdTime": 1482650342990
 	},
 	{
+		"user": "585f758acb9c00775abdb091",
+		"type": "gift",
+		"ip": "127.0.0.1",
+		"data": {
+			"by": "register",
+			"amount": 1000
+		},
+		"createdTime": 1482650612994
+	},	
+	{
 		"user": "585f758acb9c00775abdb092",
 		"type": "register",
 		"ip": "127.0.0.1",
 		"createdTime": 1482650442990
 	},
+	{
+		"user": "585f758acb9c00775abdb092",
+		"type": "gift",
+		"ip": "127.0.0.1",
+		"data": {
+			"by": "register",
+			"amount": 1000
+		},
+		"createdTime": 1482650442996
+	},		
 	{
 		"user": "585f758acb9c00775abdb093",
 		"type": "register",
@@ -18,9 +38,28 @@
 		"createdTime": 1482650542990
 	},
 	{
+		"user": "585f758acb9c00775abdb093",
+		"type": "gift",
+		"ip": "127.0.0.1",
+		"data": {
+			"by": "register",
+			"amount": 1000
+		},
+		"createdTime": 1482650542997
+	},		
+	{
 		"user": "585f758acb9c00775abdb091",
 		"type": "login",
 		"ip": "127.0.0.1",
+		"createdTime": 1482650612990
+	},
+	{
+		"user": "585f758acb9c00775abdb091",
+		"type": "cash",
+		"ip": "127.0.0.1",
+		"data": {
+			"amount": 1000
+		},
 		"createdTime": 1482650612990
 	},
 	{
@@ -101,6 +140,32 @@
 	},	
 	{
 		"user": "585f758acb9c00775abdb092",
+		"type": "login",
+		"ip": "127.0.0.1",
+		"createdTime": 1482655441990
+	},
+	{
+		"user": "585f758acb9c00775abdb092",
+		"type": "cash",
+		"ip": "127.0.0.1",
+		"data": {
+			"amount": 2000
+		},
+		"createdTime": 1482655441990
+	},	
+	{
+		"user": "585f758acb9c00775abdb091",
+		"type": "gift",
+		"ip": "127.0.0.1",
+		"data": {
+			"by": "invitation",
+			"uid": "585f758acb9c00775abdb092",
+			"amount": 2000
+		},
+		"createdTime": 1482655441990
+	},
+	{
+		"user": "585f758acb9c00775abdb092",
 		"type": "addPage",
 		"ip": "127.0.0.1",
 		"data": {
@@ -108,6 +173,12 @@
 			"tags": ["淘宝"]
 		},
 		"createdTime": 1482655442990		
+	},
+	{
+		"user": "585f758acb9c00775abdb093",
+		"type": "login",
+		"ip": "127.0.0.1",
+		"createdTime": 1482656541990
 	},
 	{
 		"user": "585f758acb9c00775abdb093",

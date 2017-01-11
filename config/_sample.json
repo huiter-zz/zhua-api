@@ -36,5 +36,9 @@
 	    "domain": ""
 	},
 
-	"corsWhiteList":  ["\\.sensoro\\.com$"]
+	"corsWhiteList":  ["\\.sensoro\\.com$"],
+
+	"maxConcurrentCallsPerWorker": 10,
+
+	"registerGivenAmount": 1000
 }

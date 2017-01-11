@@ -1,9 +1,15 @@
 /* global describe: true, context: true, it: true, http:true */
 'use strict';
 
+const config = require('config');
+const sinon = require('sinon');
 const fixtures = require('../../load_fixtures');
+const utils = require('../../../utils');
 const Log = require('../../../model').Log;
+const Property = require('../../../model').Property;
 const users = fixtures.user;
+
+const registerGivenAmount = +config.registerGivenAmount || 1000; // 注册后赠送的充值金额
 
 
 describe('POST /users/register', function() {
@@ -113,11 +119,96 @@ describe('POST /users/register', function() {
 			.expect(200, function(err, res) {
 				res.body.should.have.property('uid');
 				res.body.nickname.should.equal('test');
+				res.body.should.have.property('invitationCode');
 				console.log(res.body);
 				Log.find({user: res.body.uid}, function(err, docs) {
-					docs.length.should.equal(1);
-					docs[0].type.should.equal('register');
-					docs[0].ip.should.equal('127.0.0.1');
+					docs.length.should.equal(2);
+					docs[0].type.should.equal('gift');
+					docs[0].data.amount.should.equal(registerGivenAmount);
+					docs[1].type.should.equal('register');
+					docs[1].ip.should.equal('127.0.0.1');
+					Property.findOne({user: res.body.uid}, function(err, doc) {
+						doc.cash.should.equal(0);
+						doc.gift.should.equal(registerGivenAmount);
+						done();
+					});
+				});
+			});
+		});
+	});	
+
+	context('with referralsCode', function() {
+		it('success', function(done) {
+			http.post('/users/register')
+			.send({email: 'test@zhua.pm', password: '123456', nickname: 'test', referralsCode: users[0].invitationCode})
+			.set('x-real-ip', '134.45.45.45')
+			.expect(200, function(err, res) {
+				res.body.should.have.property('uid');
+				res.body.nickname.should.equal('test');
+				res.body.should.have.property('invitationCode');
+				res.body.referrals.user.should.equal(users[0]._id);
+				res.body.referrals.code.should.equal(users[0].invitationCode);
+				res.body.referrals.isPay.should.equal(false);
+				Log.find({user: res.body.uid}, function(err, docs) {
+					docs.length.should.equal(2);
+					docs[0].type.should.equal('gift');
+					docs[0].data.amount.should.equal(registerGivenAmount);
+					docs[1].type.should.equal('register');
+					docs[1].ip.should.equal('127.0.0.1');
+					Property.findOne({user: res.body.uid}, function(err, doc) {
+						doc.cash.should.equal(0);
+						doc.gift.should.equal(registerGivenAmount);
+						done();
+					});
+				});
+			});
+		});
+	});	
+
+	context('generateInvitationCode repeat and register failure', function() {
+		it('success', function(done) {
+			let stub = sinon.stub(utils, 'randomString', function(len) {
+				return 'abcd';
+			});
+			http.post('/users/register')
+			.send({email: 'test@zhua.pm', password: '123456', nickname: 'test', referralsCode: users[0].invitationCode})
+			.set('x-real-ip', '134.45.45.45')
+			.expect(200, function(err, res) {
+				http.post('/users/register')
+				.send({email: 'test123@zhua.pm', password: '123456', nickname: 'test123', referralsCode: users[0].invitationCode})
+				.set('x-real-ip', '134.45.45.45')
+				.expect(400, function(err, res) {
+					stub.restore();
+					res.body.errcode.should.equal(40007);
+					res.body.errmsg.should.equal('生成邀请码出错');
+					done();
+				});
+			});
+		});
+	});
+
+	context('generateInvitationCode repeat twice', function() {
+		it('success', function(done) {
+			var count = 0;
+			let stub = sinon.stub(utils, 'randomString', function(len) {
+				count++;
+				console.log(len,count);
+				if (count > 3) {
+					return 'abce';
+				} else {
+					return 'abcd';
+				}
+			});
+			http.post('/users/register')
+			.send({email: 'test@zhua.pm', password: '123456', nickname: 'test', referralsCode: users[0].invitationCode})
+			.set('x-real-ip', '134.45.45.45')
+			.expect(200, function(err, res) {
+				http.post('/users/register')
+				.send({email: 'test123@zhua.pm', password: '123456', nickname: 'test123', referralsCode: users[0].invitationCode})
+				.set('x-real-ip', '134.45.45.45')
+				.expect(200, function(err, res) {
+					stub.restore();
+					res.body.should.have.property('invitationCode');
 					done();
 				});
 			});

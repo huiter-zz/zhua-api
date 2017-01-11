@@ -8,7 +8,11 @@ const users = fixtures.user;
 const logs = fixtures.log;
 var data = {
 	page: 'http://www.zhua.pm',
-	tags: ['抓页面']
+	tags: ['抓页面'],
+	setting: {
+		size: '1920x780',
+		delay: 2
+	}
 };
 
 describe('POST /pages', function() {
@@ -96,6 +100,54 @@ describe('POST /pages', function() {
 			.expect(400, function(err, res) {
 				res.body.errcode.should.equal(40023);
 				res.body.errmsg.should.equal('标签内容只能是 String 或者 Number 类型');
+				done();
+			});
+		});
+	});	
+
+	context('setting.size invalid 1', function() {
+		it('标签内容不合法', function(done) {
+			var _data = _.cloneDeep(data);
+			_data.setting.size = '1920*780';
+			http.post('/pages')
+			.auth(users[0].email, users[0].password)
+			.send(_data)
+			.expect(400, function(err, res) {
+				console.log(res.body);
+				res.body.errcode.should.equal(40025);
+				res.body.errmsg.should.equal('页面配置 size 格式不合法，格式应该为 1920x780 样式');
+				done();
+			});
+		});
+	});	
+
+	context('setting.size invalid 2', function() {
+		it('标签内容不合法', function(done) {
+			var _data = _.cloneDeep(data);
+			_data.setting.size = '1920xabc';
+			http.post('/pages')
+			.auth(users[0].email, users[0].password)
+			.send(_data)
+			.expect(400, function(err, res) {
+				console.log(res.body);
+				res.body.errcode.should.equal(40025);
+				res.body.errmsg.should.equal('页面配置 size 格式不合法，格式应该为 1920x780 样式');
+				done();
+			});
+		});
+	});
+
+	context('setting.delay invalid', function() {
+		it('标签内容不合法', function(done) {
+			var _data = _.cloneDeep(data);
+			_data.setting.delay = 11;
+			http.post('/pages')
+			.auth(users[0].email, users[0].password)
+			.send(_data)
+			.expect(400, function(err, res) {
+				console.log(res.body);
+				res.body.errcode.should.equal(40026);
+				res.body.errmsg.should.equal('页面抓取延时时间不能超过 10 秒');
 				done();
 			});
 		});

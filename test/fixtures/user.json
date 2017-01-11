@@ -5,6 +5,7 @@
 		"password": "123456",
 		"nickname": "张三",
 		"phone": 13498762781,	
+		"invitationCode": "20161225abcd",
 		"createdTime": 1482650342990
 	},
 	{
@@ -12,6 +13,12 @@
 		"email": "t2@zhua.pm",
 		"nickname": "李四",
 		"password": "123456",
+		"invitationCode": "20161225abce",
+		"referrals": {
+			"user": "585f758acb9c00775abdb091",
+			"code": "20161225abcd",
+			"isPay": true
+		},
 		"createdTime": 1482650442990
 	},
 	{
@@ -19,6 +26,12 @@
 		"email": "t3@zhua.pm",
 		"nickname": "王五",
 		"password": "123456",
+		"invitationCode": "20161225abcf",
+		"referrals": {
+			"user": "585f758acb9c00775abdb091",
+			"code": "20161225abcd",
+			"isPay": false
+		},
 		"createdTime": 1482650542990
 	}		
 ]
