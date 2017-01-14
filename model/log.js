@@ -15,8 +15,7 @@ const types = {
   delPage: 'delPage', // 删除页面
   uploadFile: 'uploadFile', // 上传文件
   cash: 'cash', // 现金充值
-  gift: 'gift', // 赠送充值
-  inviteGifts: 'inviteGifts' // 邀请别人注册赠送
+  gift: 'gift' // 赠送充值
 };
 
 const typeArray = _.values(types);

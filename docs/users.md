@@ -296,4 +296,3 @@
 `uploadFile`: 上传文件  
 `cash`: 现金充值  
 `gift`: 赠送充值  
-`inviteGifts`: 邀请别人注册赠送  
