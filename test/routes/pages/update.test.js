@@ -136,6 +136,51 @@ describe('PUT /pages:/pid', function() {
 		});
 	});
 
+	context('with arr setting', function() {
+		it('success', function(done) {
+			var _data = _.cloneDeep(data);
+			_data.setting = {
+				size: ['1920x760'],
+				delay: 3
+			};
+			http.put('/pages/' + pages[0]._id)
+			.auth(users[0].email, users[0].password)
+			.send(_data)
+			.expect(200, function(err, res) {
+				res.body.should.have.property('id');
+				setTimeout(function() {
+					Log.find({
+						user: users[0]._id,
+						type: Log.types('updatePage')
+					}, function (err, docs) {
+						var _logs = _.filter(logs, function(item) {
+							return item.user === users[0]._id && item.type === Log.types('updatePage');
+						})
+						docs.length.should.equal(_logs.length + 1);
+						done();
+					});
+				}, 300);
+			});
+		});
+	});
+
+	context('with arr setting 1', function() {
+		it('success', function(done) {
+			var _data = _.cloneDeep(data);
+			_data.setting = {
+				size: ['1920x760', {a: '1'}],
+				delay: 3
+			};
+			http.put('/pages/' + pages[0]._id)
+			.auth(users[0].email, users[0].password)
+			.send(_data)
+			.expect(400, function(err, res) {
+				res.body.errcode.should.equal(40025);
+				res.body.errmsg.should.equal('页面配置 size 格式不合法，格式应该为 1920x780 样式');
+				done();				
+			});
+		});
+	});
 	context('without title', function() {
 		it('success', function(done) {
 			var _data = _.cloneDeep(data);

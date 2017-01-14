@@ -6,7 +6,7 @@
 var mongoose = require('mongoose');
 
 var schema = module.exports = new mongoose.Schema({
-  user: {type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true},
+  user: {type: mongoose.Schema.Types.ObjectId, ref: 'User', unique: true, required: true},
   cash: {type: Number, default: 0}, // 剩余充值余额
   gift: {type: Number, default: 0} // 剩余赠送金额
 });

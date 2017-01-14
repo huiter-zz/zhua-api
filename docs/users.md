@@ -148,3 +148,152 @@
 	{"result": "success"}
 	
 ```
+
+### 6. 获取自己的余额  
+
+```
+	GET /users/balances
+```
+
+`返回值:`
+ 
+```
+	{
+		"user": "585f758acb9c00775abdb091", # 用户 ID
+		"cash": 1000, # 现金充值余额
+		"gift": 3000 # 赠送余额
+	}
+```
+
+### 7. 获取自己已邀请的用户列表  
+
+```
+	GET /users/invitations
+```
+`参数:`  
+
+```
+	{
+		"page": 1, # 分页参数，第几页
+		"count": 20, # 分页参数，每页多少条数据	
+	}
+```
+
+`返回值:`  
+
+```
+	{
+		"total": 43,
+		"data": [
+			{
+				"nickname": "李四", # 被邀请用户昵称
+				"avatar": "http:zhua.pm/t.png", # 被邀请用户头像
+				"referrals": {
+					"user": "585f758acb9c00775abdb091", # 自己的用户 ID
+					"code": "20161225abcd", # 当时的邀请码
+					"isPay": true, # 被邀请用户是否已充值
+					"amount": 1000 # 被邀请用户第一次充值金额
+				}
+			}
+			...
+		]
+	}
+```
+
+### 8. 获取自己的操作日志记录  
+
+```
+	GET /users/logs
+```
+
+`参数:`  
+
+```
+	{
+		"type": "login", # 日志类型，可以是数组，或者是已 `,` 分隔的字符串。
+		"stime": 1482650342990 # 时间过滤，起始时间
+		"etime": 1482656541990 # 时间顾虑，结束时间
+	}
+```
+
+`返回值:`  
+
+```
+	{
+		"total": 132,
+		"data": [
+			{
+				"user": "585f758acb9c00775abdb091", # 自己的 ID
+				"type": "register", # 日志类型
+				"ip": "127.0.0.1", # 用户客服端 IP 地址
+				"createdTime": 1482650342990 # 发生时间
+			},
+			{
+				"user": "585f758acb9c00775abdb091",
+				"type": "gift",
+				"ip": "127.0.0.1",
+				"data": {
+					"by": "register", # 注册赠送
+					"amount": 1000 # 10 元
+				},
+				"createdTime": 1482650612994
+			},	
+			{
+				"user": "585f758acb9c00775abdb091",
+				"type": "login",
+				"ip": "127.0.0.1",
+				"createdTime": 1482650612990
+			},
+			{
+				"user": "585f758acb9c00775abdb091",
+				"type": "cash",
+				"ip": "127.0.0.1",
+				"data": {
+					"amount": 1000
+				},
+				"createdTime": 1482650612990
+			},
+			{
+				"user": "585f758acb9c00775abdb091",
+				"type": "updateInfo",
+				"ip": "127.0.0.1",
+				"data": {
+					"name": "张三",
+					"phone": 13498762781
+				},
+				"createdTime": 1482650712990
+			},
+			{
+				"user": "585f758acb9c00775abdb091",
+				"type": "updatePass",
+				"ip": "127.0.0.1",
+				"createdTime": 1482650812990
+			},
+			{
+				"user": "585f758acb9c00775abdb091",
+				"type": "addPage",
+				"ip": "127.0.0.1",
+				"data": {
+					"page": "http://www.baidu.com",
+					"tags": ["百度"]
+				},
+				"createdTime": 1482651342990		
+			}
+			...
+		]
+	}	
+```
+
+* type 可取值  
+
+`register`: 注册  
+`login`: 登录  
+`updateInfo`: 修改新用户信息  
+`updatePass`: 修改密码  
+`addPage`: 添加新页面  
+`updatePage`: 修改页面信息  
+`delPage`: 删除页面  
+`uploadFile`: 上传文件  
+`cash`: 现金充值  
+`gift`: 赠送充值  
+`inviteGifts`: 邀请别人注册赠送  

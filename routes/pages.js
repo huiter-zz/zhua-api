@@ -14,4 +14,8 @@ router.get('/', auth, pageCtrl.list);
 // 删除页面
 router.delete('/:id', auth, pageCtrl.remove);
 
+
+// 获取某页面快照列表
+router.get('/:id/snapshots', auth, pageCtrl.listSnapshot);
+
 module.exports = router;

@@ -52,7 +52,7 @@
 ### 修改页面标签
 
 ```
-	PUT /pages/:pid
+	PUT /pages/:id
 ```  
 
 
@@ -110,7 +110,7 @@
 	{
 		"page": 1, # 分页参数，第几页
 		"count": 20, # 分页参数，每页多少条
-		"pid": "585f758acb9c00775aabcef1", # page ID 过滤
+		"id": "585f758acb9c00775aabcef1", # page ID 过滤
 		"tags": "抓页面", # 标签过滤，可以是数组
 		"keyword": "页面" # 关键字查询。从标签中匹配
 	}
@@ -144,7 +144,7 @@
 ### 删除页面
 
 ```
-	DELETE /pages/:pid
+	DELETE /pages/:id
 ```  
 
 `返回值:`  
@@ -159,4 +159,37 @@
 	错误信息：
 	
 	{"errcode": 40024, "errmsg": "页面不存在"}
+```
+
+### 获取页面快照  
+
+```
+	GET /pages/:id/snapshots  
+```
+
+`参数:`  
+
+```
+	{
+		"page": 1, # 分页参数，第几页
+		"count": 20, # 分页参数，每页多少条数据
+		"stime": 1482624000000 # 时间过滤，起始时间
+		"etime": 1482883200000 # 时间过滤，结束时间
+	}
+```
+
+`返回值:`  
+
+```
+	{
+		"total": 21,
+		"data": [
+			{
+				"pid": "585f758acb9c00775aabcef1", # 页面 Page ID
+				"url": "http://zhua.pm/shapshot/a.png", # 快照图片 url
+				"createdTime": 1482624000000 # 抓取此快照的时间
+			}
+			...
+		]
+	}
 ```

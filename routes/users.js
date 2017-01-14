@@ -18,7 +18,16 @@ router.put('/me', auth, userCtrl.updateInfo);
 router.put('/me/password', auth, userCtrl.resetPassword);
 
 // 登出
-router.delete('/logout', userCtrl.logout);
+router.delete('/logout', auth, userCtrl.logout);
+
+// 获取余额
+router.get('/balances', auth, userCtrl.getBalance);
+
+// 获取已邀请的用户列表
+router.get('/invitations', auth, userCtrl.getInvitationUsers);
+
+// 获取自己的操作记录 <注册，登陆，修改信息，添加页面，修改页面，修改密码，充值，赠送，扣费 >
+router.get('/logs', auth, userCtrl.getLogs);
 
 
 module.exports = router;

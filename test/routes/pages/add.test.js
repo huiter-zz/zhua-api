@@ -138,6 +138,22 @@ describe('POST /pages', function() {
 		});
 	});
 
+	context('setting.size invalid 3', function() {
+		it('标签内容不合法', function(done) {
+			var _data = _.cloneDeep(data);
+			_data.setting.size = [['a'], '1920x780'];
+			http.post('/pages')
+			.auth(users[0].email, users[0].password)
+			.send(_data)
+			.expect(400, function(err, res) {
+				console.log(res.body);
+				res.body.errcode.should.equal(40025);
+				res.body.errmsg.should.equal('页面配置 size 格式不合法，格式应该为 1920x780 样式');
+				done();
+			});
+		});
+	});
+
 	context('setting.delay invalid', function() {
 		it('标签内容不合法', function(done) {
 			var _data = _.cloneDeep(data);
@@ -204,6 +220,32 @@ describe('POST /pages', function() {
 			});
 		});
 	});
+
+	context('without setting', function() {
+		it('success', function(done) {
+			var _data = _.cloneDeep(data);
+			delete _data.setting;
+			http.post('/pages')
+			.auth(users[0].email, users[0].password)
+			.send(_data)
+			.expect(200, function(err, res) {
+				res.body.should.have.property('id');
+				res.body.page.should.equal(_data.page);
+				setTimeout(function() {
+					Log.find({
+						user: users[0]._id,
+						type: Log.types('addPage')
+					}, function (err, docs) {
+						var _logs = _.filter(logs, function(item) {
+							return item.user === users[0]._id && item.type === Log.types('addPage');
+						})
+						docs.length.should.equal(_logs.length + 1);
+						done();
+					});
+				}, 300);
+			});
+		});
+	});	
 
 	context('without title', function() {
 		it('success', function(done) {

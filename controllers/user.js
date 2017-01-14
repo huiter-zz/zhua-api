@@ -335,3 +335,76 @@ exports.logout = function *(next) {
 	this.status = 200;
 	this.body = {result: 'success'};
 };
+
+// 获取自己的余额
+exports.getBalance = function *(next) {
+	let user = this.user;
+	let data = yield Property.findOne({
+		user: user._id
+	});
+
+	this.status = 200;
+	this.body = data;
+	return;
+};
+
+// 获取自己邀请的用户列表 
+exports.getInvitationUsers = function *(next) {
+	let user = this.user;
+	let query = this.request.query || {};
+	let count = +query.count || 30;
+	let page = +query.page || 1;
+
+	let users = yield User.find({'referrals.user': user._id}).skip((page - 1) * count).limit(count);
+	let total = yield User.count({'referrals.user': user._id});
+
+	let result = _.map(users, function(item) {
+		item = item.toJSON();
+		return {
+			nickname: item.nickname,
+			avatar: item.avatar,
+			referrals: item.referrals
+		};
+	});
+
+	this.status = 200;
+	this.body = {data: result, total: total};
+	return;
+};
+
+// 获取自己的操作记录  
+exports.getLogs = function *(next) {
+	let user = this.user;
+	let query = this.request.query || {};
+	let type = query.type;
+	let stime = +query.stime;
+	let etime = +query.etime;
+	let count = +query.count || 30;
+	let page = +query.page || 1;
+	if (_.isString(type)) {
+		type = _.uniq(_.compact(type.split(',')));
+	}
+
+	let condition = {
+		user: user._id
+	};
+
+	if (type) {
+		condition.type = {$in: type};
+	}
+
+	if (stime) {
+		condition.createdTime = {$gte: stime};
+	}
+
+	if (etime) {
+		condition.createdTime = _.extend(condition.createdTime || {}, {$lte: etime});
+	}
+
+	let logs = yield Log.find(condition).skip((page - 1) * count).limit(count);
+	let total = yield Log.count(condition);
+
+	this.status = 200;
+	this.body = {data: logs, total: total};
+	return;
+};

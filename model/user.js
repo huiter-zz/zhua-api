@@ -18,7 +18,8 @@ var schema = module.exports = new mongoose.Schema({
   referrals: {
     user: { type: mongoose.Schema.Types.ObjectId, ref: 'User'}, // 引码对应的用户 ID
     code: String, // 注册时填写的邀请码
-    isPay: {type: Boolean}
+    isPay: {type: Boolean},
+    amount: {type: Number} // 被邀请用户充值金额
   },
   createdTime: {type: Date, default: Date.now }
 });
