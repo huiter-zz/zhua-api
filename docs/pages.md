@@ -11,6 +11,7 @@
 ```
 	{
 		"page": "http://www.baidu.com", # 页面 url，必传
+		"title": "百度", # 标题
 		"tags": ["百度"], # 标签，不能超过 5 个。标签内容长度不能超过 20 个字符
 		"setting": {
 			"size": "1920x780", # 页面大小，默认 1024x768
@@ -28,6 +29,7 @@
 		"id": "585f758acb9c00775aabcef1", # page ID
 		"user": "585f758acb9c00775abdb091", # 用户 ID
 		"page": "http://www.baidu.com",
+		"title": "百度", # 标题
 		"tags": ["百度"],
 		"setting": {
 			"size": "1920x780", # 页面大小，默认 1024x768
@@ -44,6 +46,7 @@
 	{"errcode": 40023, "errmsg": "标签内容只能是 String 或者 Number 类型"}
 	{"errcode": 40025, "errmsg": "页面配置 size 格式不合法，格式应该为 1920x780 样式"}  
 	{"errcode": 40026, "errmsg": "页面抓取延时时间不能超过 10 秒"}  
+	{"errcode": 40027, "errmsg": "页面标题不能为空，长度不能大于 50 位"}  
 ```
 
 ### 修改页面标签
@@ -57,6 +60,7 @@
 
 ```
 	{
+		"title": "baidu", # 标题
 		"tags": ["抓页面", "百度"], # 标签，不能超过 5 个。标签内容长度不能超过 20 个字符
 		"setting": {
 			"size": "1920x780", # 页面大小，默认 1024x768
@@ -74,6 +78,7 @@
 		"id": "585f758acb9c00775aabcef1", # page ID
 		"user": "585f758acb9c00775abdb091", # 用户 ID
 		"page": "http://www.baidu.com",
+		"title": "baidu", # 标题
 		"tags": ["抓页面", "百度"],
 		"setting": {
 			"size": "1920x780", # 页面大小，默认 1024x768
@@ -89,7 +94,8 @@
 	{"errcode": 40022, "errmsg": "页面标签数量不能超过 5 个"}
 	{"errcode": 40023, "errmsg": "标签内容只能是 String 或者 Number 类型"}
 	{"errcode": 40025, "errmsg": "页面配置 size 格式不合法，格式应该为 1920x780 样式"}
-	{"errcode": 40026, "errmsg": "页面抓取延时时间不能超过 10 秒"}
+	{"errcode": 40026, "errmsg": "页面抓取延时时间不能超过 10 秒"} 
+	{"errcode": 40027, "errmsg": "页面标题不能为空，长度不能大于 50 位"}  
 ```
 
 ### 列表页面
@@ -122,6 +128,7 @@
 				"id": "585f758acb9c00775aabcef1", # page ID
 				"user": "585f758acb9c00775abdb091", # 用户 ID
 				"page": "http://www.baidu.com",
+				"title": "baidu", # 标题
 				"tags": ["抓页面", "百度"],
 				"setting": {
 					"size": "1920x780", # 页面大小，默认 1024x768

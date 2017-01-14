@@ -21,6 +21,13 @@ const pageDataCheck = function *(data, isUpdate) {
         }));
 	}
 
+	if (!data.title || data.title.length > 50) {
+        return Promise.reject(errorWrapper({
+            errcode: 40027,
+            errmsg: '页面标题不能为空，长度不能大于 50 位'
+        }));
+	}
+
 	let errmsg = '';
 	_.find(data.tags, function (item) {
 		if (!_.isString(item) && !_.isNumber(item)) {
@@ -94,6 +101,7 @@ exports.update = function *(next) {
 	let pid = this.params.id;
 	let user = this.user;
 	let data = this.request.body || {};
+
 	if (data.tags) {
 		if (_.isString(data.tags)) data.tags = [data.tags];
 		data.tags = _.uniq(_.compact(data.tags));
@@ -108,6 +116,7 @@ exports.update = function *(next) {
 		del: false
 	}, {
 		$set: {
+			title: data.title,
 			tags: data.tags,
 			setting: data.setting
 		}

@@ -9,6 +9,7 @@ const logs = fixtures.log;
 const pages = fixtures.page;
 
 var data = {
+	title: '123456',
 	tags: ['抓页面']
 };
 
@@ -131,6 +132,37 @@ describe('PUT /pages:/pid', function() {
 						done();
 					});
 				}, 300);
+			});
+		});
+	});
+
+	context('without title', function() {
+		it('success', function(done) {
+			var _data = _.cloneDeep(data);
+			delete _data.title;
+			http.put('/pages/' + pages[0]._id)
+			.auth(users[0].email, users[0].password)
+			.send(_data)
+			.expect(400, function(err, res) {
+				res.body.errcode.should.equal(40027);
+				res.body.errmsg.should.equal('页面标题不能为空，长度不能大于 50 位');
+				done();
+			});
+		});
+	});
+
+	context('title.length > 50', function() {
+		it('success', function(done) {
+			var _data = _.cloneDeep(data);
+			_data.title = '页面标题页面标题页面标题页面标题页面标题页面标题页面标题页面标题页面标题页面标题页面标题页面标题asdf';
+			http.put('/pages/' + pages[0]._id)
+			.auth(users[0].email, users[0].password)
+			.send(_data)
+			.expect(400, function(err, res) {
+				console.log(res.body);
+				res.body.errcode.should.equal(40027);
+				res.body.errmsg.should.equal('页面标题不能为空，长度不能大于 50 位');
+				done();
 			});
 		});
 	});		

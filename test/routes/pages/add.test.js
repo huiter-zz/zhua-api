@@ -8,6 +8,7 @@ const users = fixtures.user;
 const logs = fixtures.log;
 var data = {
 	page: 'http://www.zhua.pm',
+	title: 'zhua',
 	tags: ['抓页面'],
 	setting: {
 		size: '1920x780',
@@ -202,5 +203,35 @@ describe('POST /pages', function() {
 				}, 300);
 			});
 		});
-	});		
+	});
+
+	context('without title', function() {
+		it('success', function(done) {
+			var _data = _.cloneDeep(data);
+			delete _data.title;
+			http.post('/pages')
+			.auth(users[0].email, users[0].password)
+			.send(_data)
+			.expect(400, function(err, res) {
+				res.body.errcode.should.equal(40027);
+				res.body.errmsg.should.equal('页面标题不能为空，长度不能大于 50 位');
+				done();
+			});
+		});
+	});
+
+	context('title.length > 50', function() {
+		it('success', function(done) {
+			var _data = _.cloneDeep(data);
+			_data.title = '页面标题页面标题页面标题页面标题页面标题页面标题页面标题页面标题页面标题页面标题页面标题页面标题asdf';
+			http.post('/pages')
+			.auth(users[0].email, users[0].password)
+			.send(_data)
+			.expect(400, function(err, res) {
+				res.body.errcode.should.equal(40027);
+				res.body.errmsg.should.equal('页面标题不能为空，长度不能大于 50 位');
+				done();
+			});
+		});
+	});			
 });
