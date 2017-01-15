@@ -65,7 +65,7 @@ const initUserProperty = function *(uid) {
 };
 
 // 修改用户余额
-const updateProperty = function *(uid, type, amount, ip) {
+const updateProperty = function *(uid, type, amount, ip, by) {
 	amount = +amount || 0;
 	var updateDoc = {};
 	logger.info('修改用户余额 type: %s uid: %s amount: %s', type, uid, amount);
@@ -94,6 +94,7 @@ const updateProperty = function *(uid, type, amount, ip) {
 			type: Log.types(type),
 			ip: ip,
 			data: {
+				by: by,
 				amount: amount
 			}
 		});
@@ -149,7 +150,7 @@ exports.register = function *(next) {
 	// 初始化用户财产 model
 	yield initUserProperty(user._id);
 	// 充值
-	yield updateProperty(user._id, 'gift', registerGivenAmount, this.cleanIP);
+	yield updateProperty(user._id, 'gift', registerGivenAmount, this.cleanIP, 'register');
 
     this.status = 200;
     this.body = user;
@@ -407,4 +408,9 @@ exports.getLogs = function *(next) {
 	this.status = 200;
 	this.body = {data: logs, total: total};
 	return;
+};
+
+// 用户充值
+exports.recharge = function *(next) {
+
 };

@@ -2,6 +2,7 @@ const router = require('koa-router')();
 const users = require('./users');
 const pages = require('./pages');
 const files = require('./files');
+const admins = require('./admins');
 const mountIP = require('../utils').mountIP;
 
 router.get('/', function *(next) {
@@ -18,5 +19,7 @@ router.use('users', mountIP, users.routes());
 router.use('pages', mountIP, pages.routes());
 
 router.use('files', mountIP, files.routes());
+
+router.use('admins', mountIP, admins.routes());
 
 module.exports = router;

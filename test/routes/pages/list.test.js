@@ -72,7 +72,7 @@ describe('GET /pages', function() {
 		it('success', function(done) {
 			http.get('/pages')
 			.auth(users[0].email, users[0].password)
-			.query({pid: pages[0]._id})
+			.query({id: pages[0]._id})
 			.expect(200, function(err, res) {
 				res.body.total.should.equal(1);
 				res.body.data.length.should.equal(1);

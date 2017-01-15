@@ -29,5 +29,9 @@ router.get('/invitations', auth, userCtrl.getInvitationUsers);
 // 获取自己的操作记录 <注册，登陆，修改信息，添加页面，修改页面，修改密码，充值，赠送，扣费 >
 router.get('/logs', auth, userCtrl.getLogs);
 
+// 用户充值
+router.post('/recharge', auth, userCtrl.recharge);
+
+
 
 module.exports = router;

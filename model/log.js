@@ -15,7 +15,8 @@ const types = {
   delPage: 'delPage', // 删除页面
   uploadFile: 'uploadFile', // 上传文件
   cash: 'cash', // 现金充值
-  gift: 'gift' // 赠送充值
+  gift: 'gift', // 赠送充值
+  adjust: 'adjust' // 调账，admin 角色用户拥有此日志记录
 };
 
 const typeArray = _.values(types);

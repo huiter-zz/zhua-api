@@ -21,6 +21,7 @@ var schema = module.exports = new mongoose.Schema({
     isPay: {type: Boolean},
     amount: {type: Number} // 被邀请用户充值金额
   },
+  isAdmin: {type: Boolean, default: false}, //  是否是管理员
   createdTime: {type: Date, default: Date.now }
 });
 
@@ -69,5 +70,8 @@ schema.options.toJSON.transform = function (doc, ret) {
   delete ret.emailLower;
   delete ret.__v;
   delete ret._id;
+  if (!ret.isAdmin) {
+    delete ret.isAdmin;
+  }
   ret.createdTime = ret.createdTime && ret.createdTime.valueOf();
 };
