@@ -74,15 +74,19 @@ const recurrence = function *(time, pid) {
 	let oldLastFetchTime, id, page;
 	let doc = yield Page.findOneAndUpdate({
 		del: false,
-		lastFetchTime: {
-			$lt: time
-		},
 		createdTime: {
 			$lt: time
-		}
+		},
+		$or: [
+			{
+				lastFetchTime: { $lt: time },
+				lastFetchTime: { $exists: false }
+			}
+		]
 	}, {
-		lastFetchTime: nowTime
+		lastFetchTime: time
 	});
+
 	if (!doc) {
 		logger.warn('进程 %s 抓取页面完成', pid);
 		return Promise.resolve('done');
