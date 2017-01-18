@@ -78,10 +78,8 @@ const recurrence = function *(time, pid) {
 			$lt: time
 		},
 		$or: [
-			{
-				lastFetchTime: { $lt: time },
-				lastFetchTime: { $exists: false }
-			}
+			{ lastFetchTime: { $lt: time } },
+			{ lastFetchTime: { $exists: false } }
 		]
 	}, {
 		lastFetchTime: time
@@ -108,6 +106,11 @@ const recurrence = function *(time, pid) {
 				url: ret,
 				createdTime: nowTime
 			});
+			yield Page.findOneAndUpdate({
+				_id: id
+			}, {
+				image: ret
+			});
 			logger.info('进程 %s 抓取页面成功 id: %s page: %s url: %s', pid, id, page, ret);
 		}
 	} catch(err) {
@@ -129,7 +132,7 @@ const main = function *(time, pid) {
 module.exports = function (time, callback) {
 	co(function *(time) {
 		var pid = process.pid;
-		logger.info('进程 %s 开始执行...', pid);
+		logger.warn('进程 %s 开始执行...', pid);
 		var workers = [];
 		for (var i = 0; i < maxConcurrentCallsPerWorker; i++) {
 			workers.push(main(time, pid))

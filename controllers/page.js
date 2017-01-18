@@ -197,7 +197,7 @@ exports.list = function *(next) {
 	    if (_reg) query.tags = _reg;
 	}
 
-	let pages = yield Page.find(query).skip((page - 1) * count).limit(count).exec();
+	let pages = yield Page.find(query).skip((page - 1) * count).limit(count).sort({createdTime:-1}).exec();
 	let total = 0;
 	if (pages.length < count) {
 		total = (page - 1) * count + pages.length;
@@ -281,7 +281,7 @@ exports.listSnapshot = function *(next) {
 		condition.createdTime = _.extend(condition.createdTime || {}, {$lte: etime});
 	}
 
-	let data = yield Snapshot.find(condition).skip((page - 1) * count).limit(count);
+	let data = yield Snapshot.find(condition).skip((page - 1) * count).limit(count).sort({createdTime:+1});
 	let total = yield Snapshot.count(condition);
 
 	this.status = 200;

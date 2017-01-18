@@ -45,7 +45,7 @@ module.exports = function *(next) {
         let session = yield this.session;
         console.log(session);
         if (!session || !session.uid) {
-            this.status = 400;
+            this.status = 401;
             this.body = {
                 errcode: -2,
                 errmsg: '您没有权限执行此操作，请先登录'
@@ -55,7 +55,7 @@ module.exports = function *(next) {
             user = yield User.findById(session.uid);
             /* istanbul ignore if */
             if (!user) {
-                this.status = 400;
+                this.status = 401;
                 this.body = {
                     errcode: -2,
                     errmsg: '您没有权限执行此操作，请先登录'
