@@ -10,7 +10,9 @@ const logger = require('../utils').getLogger('snapshot');
 const path = require('path');
 
 const maxConcurrentCallsPerWorker = config.maxConcurrentCallsPerWorker || 1;
-
+const RETRY_TIME = 3; // 重试次数
+const failureLockTime = 6; // 抓取失败后锁定几小时后才能再次抓取
+const successLockTime = 2; // 抓取成功后锁定几小时后才能再次抓取
 /**
  * 上传图片到七牛
  */
@@ -68,30 +70,25 @@ const fetch = function *(filename, url, setting) {
 }
 
 // 递归抓取页面并保存快照
-const recurrence = function *(time, pid) {
-	let dateStr = moment(time).format('YYYYMMDD');
+const recurrence = function *(pid) {
+	let dateStr = moment().format('YYYYMMDD');
 	let nowTime = _.now();
-	let oldLastFetchTime, id, page;
+	let id, page, retryTimes;
 	let doc = yield Page.findOneAndUpdate({
 		del: false,
-		createdTime: {
-			$lt: time
-		},
-		$or: [
-			{ lastFetchTime: { $lt: time } },
-			{ lastFetchTime: { $exists: false } }
-		]
+		createdTime: { $lt: nowTime },
+		status: { $in: ['normal', 'exception'] },
+		retryTimes: { $lt: RETRY_TIME },
+		canFetchTime: { $lt: nowTime }
 	}, {
-		lastFetchTime: time
+		status: 'fetching'
 	});
-
 	if (!doc) {
-		logger.warn('进程 %s 抓取页面完成', pid);
 		return Promise.resolve('done');
 	}
 	try {
 		doc = doc.toJSON();
-		oldLastFetchTime = doc.lastFetchTime;
+		retryTimes = doc.retryTimes;
 		id = doc.id;
 		page = doc.page;
 		let filename = id + '_' + dateStr;
@@ -101,44 +98,65 @@ const recurrence = function *(time, pid) {
 		if (ret === 'failure') {
 			logger.error('进程 %s 抓取页面失败 id: %s page: %s', pid, id, page);
 		} else {
+			// 记录快照 url
 			yield Snapshot.create({
 				pid: id,
 				url: ret,
 				createdTime: nowTime
 			});
+			// 修改 page 状态
 			yield Page.findOneAndUpdate({
 				_id: id
 			}, {
-				image: ret
+				status: 'normal',
+				image: ret,
+				lastFetchTime: Date.now(),
+				canFetchTime: moment().add(successLockTime, 'hours').valueOf(),
+				retryTimes: 0
 			});
 			logger.info('进程 %s 抓取页面成功 id: %s page: %s url: %s', pid, id, page, ret);
 		}
 	} catch(err) {
 		console.log(err);
 		logger.error('进程 %s 抓取页面失败 id: %s page: %s error: %s', pid, id, page, err.message);
+		var updateDoc = {
+			status: 'exception',
+			$inc: {
+				retryTimes: 1
+			}
+		};
+		if (retryTimes >= 2) {
+			var updateDoc = {
+				status: 'exception',
+				canFetchTime: moment().add(failureLockTime, 'hours').valueOf(),
+				retryTimes: 0
+			};
+		}
 		yield Page.findOneAndUpdate({
 			_id: id
-		}, {
-			lastFetchTime: oldLastFetchTime
-		});
+		}, updateDoc);
 	}
-	return yield recurrence(time, pid);
+	return yield recurrence(pid);
 };
 
-const main = function *(time, pid) {
-	let ret = yield recurrence(time, pid);
+const test = function() {
+	return Promise.resolve(1);
+}
+
+const main = function *(pid) {
+	let ret = yield recurrence(pid);
 };
 
-module.exports = function (time, callback) {
-	co(function *(time) {
+module.exports = function (callback) {
+	co(function *() {
 		var pid = process.pid;
 		logger.warn('进程 %s 开始执行...', pid);
 		var workers = [];
 		for (var i = 0; i < maxConcurrentCallsPerWorker; i++) {
-			workers.push(main(time, pid))
+			workers.push(main(pid))
 		}
 		yield workers;
-		logger.info('进程 %s 抓取页面完毕', pid);
+		logger.warn('进程 %s 抓取页面完毕', pid);
 		callback(null, pid);
-	}.bind(null, time));
+	});
 };
