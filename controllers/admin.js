@@ -1,9 +1,53 @@
+const _ = require('lodash');
 const User = require('../model').User;
 const Log = require('../model').Log;
 const Property = require('../model').Property;
 const utils = require('../utils');
 const logger = utils.getLogger('admin');
 
+exports.getUserList = function *() {
+    let query = this.request.query || {};
+    let page = +query.page || 1;
+    let count = +query.count || 30;
+
+    let condition = {
+        isAdmin: false
+    };
+    if (_.isString(query.uid)) {
+        query.uid = query.uid.split(',');
+    }
+    if (query.uid) {
+       condition._id = {
+            $in: query.uid
+       }
+    }
+    if (query.email) {
+        condition.emailLower = query.email.toLowerCase();
+    }
+    if (query.nickname) {
+        condition.nickname = query.nickname;
+    }
+    if (query.phone) {
+        condition.phone = query.phone;
+    }
+    if (query.keyword) {
+        var _reg;
+        try {
+          _reg = new RegExp(query.keyword, 'i');
+        }catch(e){ logger.warn('keyword %s invalid'); }
+        condition['$or'] = [
+            {email: _reg},
+            {nickname: _reg}
+        ];
+    }
+
+    let list = yield User.find(condition).skip((page - 1) * count).limit(count).sort({createdTime: -1});
+    let total = yield User.count(condition);
+
+    this.status = 200;
+    this.body = {data: list, total: total};
+    return;
+};
 
 exports.adjustment = function *(next) {
     let uid = this.request.body.uid;

@@ -20,6 +20,9 @@ const isAdminRole = function *(next) {
 	}
 };
 
+// 获取用户列表
+router.get('/users/list', auth, isAdminRole, adminCtrl.getUserList);
+
 // 管理员调账（充值，赠送）
 router.post('/adjustment', auth, isAdminRole, adminCtrl.adjustment);
 
