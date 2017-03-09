@@ -3,6 +3,7 @@ const config = require('config');
 const User = require('../model').User;
 const Log = require('../model').Log;
 const Property = require('../model').Property;
+const Page = require('../model').Page;
 const utils = require('../utils');
 const errorWrapper = utils.errorWrapper;
 const logger = utils.getLogger('user');
@@ -219,6 +220,8 @@ exports.login = function *(next) {
 		cash: property && property.cash || 0,
 		gift: property && property.gift || 0
 	};
+	let pageCount = yield Page.count({user: user.uid, del: false});
+	user.pageCount = pageCount || 0;
 	this.status = 200;
 	this.body = user;
 	return;
@@ -239,6 +242,8 @@ exports.getInfo = function *(next) {
 		cash: property && property.cash || 0,
 		gift: property && property.gift || 0
 	};
+	let pageCount = yield Page.count({user: user.uid, del: false});
+	user.pageCount = pageCount || 0;
 	this.status = 200;
 	this.body = this.user;
 	return;

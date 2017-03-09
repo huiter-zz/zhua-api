@@ -152,6 +152,7 @@ describe('POST /users/login', function() {
 			.expect(200, function(err, res) {
 				res.body.should.have.property('uid');
 				res.body.should.have.property('property');
+				res.body.pageCount.should.equal(1);
 				var _logs = _.filter(logs, function(item) {
 					return item.user === res.body.uid;
 				});
