@@ -214,6 +214,11 @@ exports.login = function *(next) {
 	} else {
 		this.session.cookie.maxAge = loginCookieExpireTime;
 	}
+	let property = yield Property.findOne({user: user.uid});
+	user.property = {
+		cash: property && property.cash || 0,
+		gift: property && property.gift || 0
+	};
 	this.status = 200;
 	this.body = user;
 	return;
@@ -229,6 +234,11 @@ exports.getInfo = function *(next) {
 	if (!user.avatar) { // 默认头像
 		user.avatar = 'http://oj54bwg6q.bkt.clouddn.com/a3192a39aeafe019159395b18f940e03.png';
 	}
+	let property = yield Property.findOne({user: user.uid});
+	user.property = {
+		cash: property && property.cash || 0,
+		gift: property && property.gift || 0
+	};
 	this.status = 200;
 	this.body = this.user;
 	return;

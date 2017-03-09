@@ -145,12 +145,13 @@ describe('POST /users/login', function() {
 	});
 
 	context('new user login', function() {
-		it('success', function(done) {
+		it.only('success', function(done) {
 			http.post('/users/login')
 			.send({email: users[2].email, password: users[2].password})
 			.set('x-real-ip', '134.45.45.45')
 			.expect(200, function(err, res) {
 				res.body.should.have.property('uid');
+				res.body.should.have.property('property');
 				var _logs = _.filter(logs, function(item) {
 					return item.user === res.body.uid;
 				});
