@@ -145,7 +145,7 @@ describe('POST /users/login', function() {
 	});
 
 	context('new user login', function() {
-		it.only('success', function(done) {
+		it('success', function(done) {
 			http.post('/users/login')
 			.send({email: users[2].email, password: users[2].password})
 			.set('x-real-ip', '134.45.45.45')

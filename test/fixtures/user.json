@@ -17,7 +17,8 @@
 		"referrals": {
 			"user": "585f758acb9c00775abdb091",
 			"code": "20161225abcd",
-			"isPay": true
+			"isPay": true,
+			"amount": 1000
 		},
 		"createdTime": 1482650442990
 	},

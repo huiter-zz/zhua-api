@@ -59,6 +59,7 @@ describe('GET /users/invitations', function() {
 				let ret = _.filter(users, function(item) {
 					return item.referrals && item.referrals.user === users[0]._id;
 				});
+				console.log(res.body.data[0]);
 				res.body.total.should.equal(ret.length);
 				res.body.data.length.should.equal(1);
 				done();
