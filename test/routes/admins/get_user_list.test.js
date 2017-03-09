@@ -41,6 +41,7 @@ describe('POST /admins/users/list', function() {
 			.expect(200, function(err, res) {
 				res.body.total.should.equal(3);
 				res.body.data.length.should.equal(3);
+				res.body.data[0].should.have.property('property');
 				done();
 			});
 		});

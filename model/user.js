@@ -15,11 +15,11 @@ var schema = module.exports = new mongoose.Schema({
   avatar: {type: String},
   phone: {type: Number},
   invitationCode: {type: String, unique: true, required: true}, // 自己的邀请码
-  referrals: {
+  referrals: { // 邀请人信息
     user: { type: mongoose.Schema.Types.ObjectId, ref: 'User'}, // 引码对应的用户 ID
     code: String, // 注册时填写的邀请码
-    isPay: {type: Boolean},
-    amount: {type: Number} // 被邀请用户充值金额
+    isPay: {type: Boolean}, // 是否给邀请人赠送充值
+    amount: {type: Number} // 邀请用户充值金额
   },
   isAdmin: {type: Boolean, default: false}, //  是否是管理员
   createdTime: {type: Date, default: Date.now }

@@ -151,4 +151,37 @@ describe('POST /admins/adjustment', function() {
 			});
 		});
 	});
+
+	context('user cash 10 yuan ', function() {
+		it('success', function(done) {
+			http.post('/admins/adjustment')
+			.auth(users[3].email, users[3].password)
+			.send({uid: users[2]._id, type: 'cash', amount: 1300})
+			.expect(200, function(err, res) {
+				res.body.result.should.equal('success');
+				var user_2 = _.find(propertys, function(item) { return item.user === users[2]._id; });
+				var user_0 = _.find(propertys, function(item) { return item.user === users[2].referrals.user; });
+				Property.findOne({user: users[2]._id}, function(err, doc1) {
+					doc1.cash.should.equal((user_2.cash || 0) + 1300);
+					Log.find({user: users[2]._id}).sort({createdTime: -1}).limit(1).exec(function(err, docs) {
+						docs[0].type.should.equal('cash');
+						docs[0].data.by.should.equal('adjustment');
+						docs[0].data.uid.should.equal(users[3]._id);
+						docs[0].data.amount.should.equal(1300);
+						Property.findOne({user: users[0]._id}, function(err, doc1) {
+							doc1.gift.should.equal((user_0.gift || 0) + 1300);
+							Log.find({user: users[0]._id}).sort({createdTime: -1}).limit(1).exec(function(err, docs) {
+								console.log(docs[0].data.uid, user_2.user)
+								docs[0].type.should.equal('gift');
+								docs[0].data.by.should.equal('invitation');
+								docs[0].data.uid.should.equal(user_2.user);
+								docs[0].data.amount.should.equal(1300);
+								done();
+							});
+						});
+					});
+				});
+			});
+		});
+	});	
 });

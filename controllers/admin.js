@@ -43,7 +43,25 @@ exports.getUserList = function *() {
 
     let list = yield User.find(condition).skip((page - 1) * count).limit(count).sort({createdTime: -1});
     let total = yield User.count(condition);
-
+    let uids = _.map(list, '_id');
+    let property = yield Property.find({user: {$in: uids}});
+    let propertyObj = {}
+    _.each(property, function(item) {
+        item = item.toJSON();
+        propertyObj[item.user] = {
+            cash: item.cash,
+            gift: item.gift
+        }
+    });
+    list = _.map(list, function(item) {
+        item = item.toJSON();
+        if (propertyObj[item.uid]) {
+            item.property = propertyObj[item.uid];
+        } else {
+            propertyObj[item.uid] = {cash: 0, gift: 0};
+        }
+        return item;
+    });
     this.status = 200;
     this.body = {data: list, total: total};
     return;
@@ -51,7 +69,7 @@ exports.getUserList = function *() {
 
 exports.adjustment = function *(next) {
     let uid = this.request.body.uid;
-    let type = this.request.body.type;
+    let type = this.request.body.type; // cash gift
     let amount = +this.request.body.amount;
 
     if (!uid || uid.length !== 24) {
@@ -91,9 +109,17 @@ exports.adjustment = function *(next) {
         };
         return;
     }
+    let inviteUid = customer.referrals && customer.referrals.user;
+    let isPay = customer.referrals && customer.referrals.isPay;
+
     let user = this.user;
     let updateDoc = {'$inc': {}};
     updateDoc['$inc'][type] = amount;
+    if (type === 'cash' && inviteUid && !isPay) {
+        updateDoc['$set'] = {};
+        updateDoc['$set']['referrals.isPay'] = true;
+        updateDoc['$set']['referrals.amount'] = amount;
+    }
     let ret;
     try {
         ret = yield Property.findOneAndUpdate({
@@ -110,6 +136,32 @@ exports.adjustment = function *(next) {
             errmsg: '调账失败'
         };
         return;
+    }
+
+    if (type === 'cash' && inviteUid && !isPay) {
+        logger.info('邀请用户 %s 赠送金额 %s', inviteUid, amount);
+        try {
+            yield Property.findOneAndUpdate({
+                user: inviteUid
+            }, {
+                $inc: {
+                    gift: amount
+                }
+            });
+            yield Log.create({
+                user: inviteUid,
+                type: Log.types('gift'),
+                ip: this.cleanIP,
+                data: {
+                    by: 'invitation',
+                    uid: customer._id.toString(),
+                    type: type,
+                    amount: amount
+                }
+            });
+        } catch(e) {
+            logger.error('邀请用户 %s 赠送失败', inviteUid, e.message);
+        }
     }
 
     logger.info('user %s adjust customer %s type %s amount %s', user.email, customer.email, type, amount);
