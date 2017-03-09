@@ -115,11 +115,6 @@ exports.adjustment = function *(next) {
     let user = this.user;
     let updateDoc = {'$inc': {}};
     updateDoc['$inc'][type] = amount;
-    if (type === 'cash' && inviteUid && !isPay) {
-        updateDoc['$set'] = {};
-        updateDoc['$set']['referrals.isPay'] = true;
-        updateDoc['$set']['referrals.amount'] = amount;
-    }
     let ret;
     try {
         ret = yield Property.findOneAndUpdate({
@@ -141,6 +136,14 @@ exports.adjustment = function *(next) {
     if (type === 'cash' && inviteUid && !isPay) {
         logger.info('邀请用户 %s 赠送金额 %s', inviteUid, amount);
         try {
+            yield User.findOneAndUpdate({
+                _id: customer._id
+            }, {
+                $set: {
+                    'referrals.isPay': true,
+                    'referrals.amount': amount
+                }
+            });
             yield Property.findOneAndUpdate({
                 user: inviteUid
             }, {

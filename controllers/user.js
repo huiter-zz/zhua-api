@@ -382,7 +382,7 @@ exports.getInvitationUsers = function *(next) {
 		return {
 			nickname: item.nickname,
 			avatar: item.avatar,
-			referrals: item.referrals
+			referrals: _.omit(item.referrals, 'user')
 		};
 	});
 
