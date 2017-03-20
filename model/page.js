@@ -23,10 +23,12 @@ var schema = module.exports = new mongoose.Schema({
     delay: Number
   },
   del: {type: Boolean, default: false},
+  startFetchTime: {type: Date}, // 最近一次开始抓取的时间
   retryTimes: {type: Number, default: 0}, // 控制页面抓取重试次数
   canFetchTime: {type: Date, default: Date.now }, // 抓取页面错误时，锁定页面在一段时间内不再抓取
   // 页面状态： 正常，抓取中，抓取页面错误
   status: {type: String, enum: ['normal', 'fetching', 'exception'], default: 'normal'},
+  exception: {},
 	createdTime: {type: Date, default: Date.now }
 });
 

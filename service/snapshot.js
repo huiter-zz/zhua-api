@@ -60,7 +60,6 @@ const fetch = function *(filename, url, setting) {
 		timeout: 120,
 		format: 'png'
 	});
-
 	yield pageres.src(url, size, options)
 		.dest(path.join(__dirname, '../snapshot'))
 		.run()
@@ -91,11 +90,22 @@ const recurrence = function *(pid) {
 		canFetchTime: { $lt: nowTime }
 	};
 	if (oneDayOneTimes) {
-		condition.lastFetchTime = {
-			$lt: todayStartTime
-		}
+		condition['$or'] = [
+			{
+				lastFetchTime: {
+					$exists: false
+				}
+			},
+			{
+				lastFetchTime: {
+					$lt: todayStartTime
+				}
+			}
+		]
 	}
+
 	let doc = yield Page.findOneAndUpdate(condition, {
+		startFetchTime: nowTime,
 		status: 'fetching'
 	});
 	if (!doc) {
@@ -112,6 +122,7 @@ const recurrence = function *(pid) {
 
 		if (ret === 'failure') {
 			logger.error('进程 %s 抓取页面失败 id: %s page: %s', pid, id, page);
+			throw new Error('failure');
 		} else {
 			// 记录快照 url
 			yield Snapshot.create({
@@ -127,11 +138,16 @@ const recurrence = function *(pid) {
 			yield Page.findOneAndUpdate({
 				_id: id
 			}, {
-				status: 'normal',
-				image: ret,
-				lastFetchTime: Date.now(),
-				canFetchTime: nextCanFetchTime,
-				retryTimes: 0
+				$set: {
+					status: 'normal',
+					image: ret,
+					lastFetchTime: Date.now(),
+					canFetchTime: nextCanFetchTime,
+					retryTimes: 0
+				},
+				$unset: {
+					exception: true
+				}
 			});
 			logger.info('进程 %s 抓取页面成功 id: %s page: %s url: %s', pid, id, page, ret);
 		}
@@ -142,6 +158,9 @@ const recurrence = function *(pid) {
 			status: 'exception',
 			$inc: {
 				retryTimes: 1
+			},
+			exception: {
+				info: err.message || err
 			}
 		};
 		if (retryTimes >= 2) {
@@ -152,7 +171,10 @@ const recurrence = function *(pid) {
 			var updateDoc = {
 				status: 'exception',
 				canFetchTime: nextCanFetchTime,
-				retryTimes: 0
+				retryTimes: 0,
+				exception: {
+					info: err.message || err
+				}
 			};
 		}
 		yield Page.findOneAndUpdate({
