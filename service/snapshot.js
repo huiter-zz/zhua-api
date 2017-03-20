@@ -13,6 +13,9 @@ const maxConcurrentCallsPerWorker = config.maxConcurrentCallsPerWorker || 1;
 const RETRY_TIME = 3; // 重试次数
 const failureLockTime = 6; // 抓取失败后锁定几小时后才能再次抓取
 const successLockTime = 2; // 抓取成功后锁定几小时后才能再次抓取
+const nextDayClearLock = true; // 第二天后清除所有锁定 
+const oneDayOneTimes = true; // 针对同一连接，一天只抓取一次（成功抓取到图片）
+
 /**
  * 上传图片到七牛
  */
@@ -73,14 +76,26 @@ const fetch = function *(filename, url, setting) {
 const recurrence = function *(pid) {
 	let dateStr = moment().format('YYYYMMDD');
 	let nowTime = _.now();
+	let todayStartTime = moment().startOf('day').valueOf();
+	let todayEndTime = moment().endOf('day').valueOf();
+	let _hour = moment(nowTime).hour();
+	let _minute = moment(nowTime).minute();
 	let id, page, retryTimes;
-	let doc = yield Page.findOneAndUpdate({
+	let condition = {
 		del: false,
 		createdTime: { $lt: nowTime },
+		'expectFetchTime.hour': {$lte: _hour},
+		'expectFetchTime.minute': {$lte: _minute},
 		status: { $in: ['normal', 'exception'] },
 		retryTimes: { $lt: RETRY_TIME },
 		canFetchTime: { $lt: nowTime }
-	}, {
+	};
+	if (oneDayOneTimes) {
+		condition.lastFetchTime = {
+			$lt: todayStartTime
+		}
+	}
+	let doc = yield Page.findOneAndUpdate(condition, {
 		status: 'fetching'
 	});
 	if (!doc) {
@@ -105,13 +120,17 @@ const recurrence = function *(pid) {
 				createdTime: nowTime
 			});
 			// 修改 page 状态
+			let nextCanFetchTime = moment().add(successLockTime, 'hours').valueOf();
+			if (nextDayClearLock && todayEndTime < nextCanFetchTime) {
+				nextCanFetchTime = todayEndTime + 1;
+			}
 			yield Page.findOneAndUpdate({
 				_id: id
 			}, {
 				status: 'normal',
 				image: ret,
 				lastFetchTime: Date.now(),
-				canFetchTime: moment().add(successLockTime, 'hours').valueOf(),
+				canFetchTime: nextCanFetchTime,
 				retryTimes: 0
 			});
 			logger.info('进程 %s 抓取页面成功 id: %s page: %s url: %s', pid, id, page, ret);
@@ -126,9 +145,13 @@ const recurrence = function *(pid) {
 			}
 		};
 		if (retryTimes >= 2) {
+			let nextCanFetchTime = moment().add(failureLockTime, 'hours').valueOf();
+			if (nextDayClearLock && todayEndTime < nextCanFetchTime) {
+				nextCanFetchTime = todayEndTime + 1;
+			}
 			var updateDoc = {
 				status: 'exception',
-				canFetchTime: moment().add(failureLockTime, 'hours').valueOf(),
+				canFetchTime: nextCanFetchTime,
 				retryTimes: 0
 			};
 		}
