@@ -81,6 +81,25 @@ const pageDataCheck = function *(data, isUpdate) {
 		}));
 	}
 
+	if (data.expectFetchTime && _.keys(data.expectFetchTime).length === 1) {
+		return Promise.reject(errorWrapper({
+			errcode: 40028,
+			errmsg: '抓取时间时间不合法，hour 和 minute 参数必须同时存在'
+		}));
+	}
+	if (data.expectFetchTime && (data.expectFetchTime.hour > 23 || data.expectFetchTime.hour < 0)) {
+		return Promise.reject(errorWrapper({
+			errcode: 40028,
+			errmsg: '抓取时间时间不合法，hour 必须大于 0 并且小于 24'
+		}));
+	}	
+	if (data.expectFetchTime && (data.expectFetchTime.minute > 59 || data.expectFetchTime.minute < 0)) {
+		return Promise.reject(errorWrapper({
+			errcode: 40028,
+			errmsg: '抓取时间时间不合法，minute 必须大于 0 并且小于 60'
+		}));		
+	}
+
 	return Promise.resolve(1);
 };
 

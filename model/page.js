@@ -12,6 +12,10 @@ var schema = module.exports = new mongoose.Schema({
 	page: { type: String, required: true },
   title: { type: String, required: true },
   image: { type: String, default: 'http://oj54bwg6q.bkt.clouddn.com/587e017d83ef230b0ce2896b_20170118.png' },
+  expectFetchTime: { // 预期抓取图片时间
+    hour: Number,
+    minute: Number
+  },
   lastFetchTime: {type: Date }, //  上一次抓取页面时间
 	tags: [String],
   setting: {

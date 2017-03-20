@@ -13,6 +13,10 @@
 		"page": "http://www.baidu.com", # 页面 url，必传
 		"title": "百度", # 标题
 		"tags": ["百度"], # 标签，不能超过 5 个。标签内容长度不能超过 20 个字符
+		"expectFetchTime": { # 预期抓取图片时间
+			"hour": 8,
+			"minute": 30
+		},
 		"setting": {
 			"size": "1920x780", # 页面大小，默认 1024x768
 			"delay": 1 # 抓取页面时延时时间，默认 1 秒
@@ -31,6 +35,10 @@
 		"page": "http://www.baidu.com",
 		"title": "百度", # 标题
 		"tags": ["百度"],
+		"expectFetchTime": { # 预期抓取图片时间
+			"hour": 8,
+			"minute": 30
+		},
 		"setting": {
 			"size": "1920x780", # 页面大小，默认 1024x768
 			"delay": 1 # 抓取页面时延时时间，默认 1 秒

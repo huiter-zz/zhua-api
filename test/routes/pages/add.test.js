@@ -276,4 +276,208 @@ describe('POST /pages', function() {
 			});
 		});
 	});			
+
+
+	context('expectFetchTime.hour < 0', function() {
+		it('success', function(done) {
+			var _data = _.cloneDeep(data);
+			_data.expectFetchTime = {
+				hour: -1,
+				minute: 30
+			};
+			http.post('/pages')
+			.auth(users[0].email, users[0].password)
+			.send(_data)
+			.expect(400, function(err, res) {
+				res.body.errcode.should.equal(40028);
+				res.body.errmsg.should.equal('抓取时间时间不合法，hour 必须大于 0 并且小于 24');
+				done();
+			});
+		});
+	});	
+
+
+	context('expectFetchTime.hour > 23', function() {
+		it('success', function(done) {
+			var _data = _.cloneDeep(data);
+			_data.expectFetchTime = {
+				hour: 24,
+				minute: 30
+			};
+			http.post('/pages')
+			.auth(users[0].email, users[0].password)
+			.send(_data)
+			.expect(400, function(err, res) {
+				res.body.errcode.should.equal(40028);
+				res.body.errmsg.should.equal('抓取时间时间不合法，hour 必须大于 0 并且小于 24');
+				done();
+			});
+		});
+	});	
+
+	context('expectFetchTime.minute < 0', function() {
+		it('success', function(done) {
+			var _data = _.cloneDeep(data);
+			_data.expectFetchTime = {
+				hour: 8,
+				minute: -1
+			};
+			http.post('/pages')
+			.auth(users[0].email, users[0].password)
+			.send(_data)
+			.expect(400, function(err, res) {
+				res.body.errcode.should.equal(40028);
+				res.body.errmsg.should.equal('抓取时间时间不合法，minute 必须大于 0 并且小于 60');
+				done();
+			});
+		});
+	});	
+
+	context('expectFetchTime.minute > 59', function() {
+		it('success', function(done) {
+			var _data = _.cloneDeep(data);
+			_data.expectFetchTime = {
+				hour: 8,
+				minute: 60
+			};
+			http.post('/pages')
+			.auth(users[0].email, users[0].password)
+			.send(_data)
+			.expect(400, function(err, res) {
+				res.body.errcode.should.equal(40028);
+				res.body.errmsg.should.equal('抓取时间时间不合法，minute 必须大于 0 并且小于 60');
+				done();
+			});
+		});
+	});		
+
+
+	context('without expectFetchTime.minute', function() {
+		it('success', function(done) {
+			var _data = _.cloneDeep(data);
+			_data.expectFetchTime = {
+				hour: 8
+			};
+			http.post('/pages')
+			.auth(users[0].email, users[0].password)
+			.send(_data)
+			.expect(400, function(err, res) {
+				res.body.errcode.should.equal(40028);
+				res.body.errmsg.should.equal('抓取时间时间不合法，hour 和 minute 参数必须同时存在');
+				done();
+			});
+		});
+	});
+
+	context('without expectFetchTime.hour', function() {
+		it('success', function(done) {
+			var _data = _.cloneDeep(data);
+			_data.expectFetchTime = {
+				minute: 30
+			};
+			http.post('/pages')
+			.auth(users[0].email, users[0].password)
+			.send(_data)
+			.expect(400, function(err, res) {
+				res.body.errcode.should.equal(40028);
+				res.body.errmsg.should.equal('抓取时间时间不合法，hour 和 minute 参数必须同时存在');
+				done();
+			});
+		});
+	});	
+
+	context('expectFetchTime right 1', function() {
+		it('success', function(done) {
+			var _data = _.cloneDeep(data);
+			_data.expectFetchTime = {
+				hour: 8,
+				minute: 30
+			};
+			http.post('/pages')
+			.auth(users[0].email, users[0].password)
+			.send(_data)
+			.expect(200, function(err, res) {
+				res.body.should.have.property('id');
+				res.body.expectFetchTime.hour.should.equal(8);
+				res.body.expectFetchTime.minute.should.equal(30);
+				done();
+			});
+		});
+	});	
+
+	context('expectFetchTime right 2', function() {
+		it('success', function(done) {
+			var _data = _.cloneDeep(data);
+			_data.expectFetchTime = {
+				hour: 23,
+				minute: 59
+			};
+			http.post('/pages')
+			.auth(users[0].email, users[0].password)
+			.send(_data)
+			.expect(200, function(err, res) {
+				res.body.should.have.property('id');
+				res.body.expectFetchTime.hour.should.equal(23);
+				res.body.expectFetchTime.minute.should.equal(59);
+				done();
+			});
+		});
+	});
+
+	context('expectFetchTime right 3', function() {
+		it('success', function(done) {
+			var _data = _.cloneDeep(data);
+			_data.expectFetchTime = {
+				hour: 0,
+				minute: 59
+			};
+			http.post('/pages')
+			.auth(users[0].email, users[0].password)
+			.send(_data)
+			.expect(200, function(err, res) {
+				res.body.should.have.property('id');
+				res.body.expectFetchTime.hour.should.equal(0);
+				res.body.expectFetchTime.minute.should.equal(59);
+				done();
+			});
+		});
+	});		
+
+	context('expectFetchTime right 3', function() {
+		it('success', function(done) {
+			var _data = _.cloneDeep(data);
+			_data.expectFetchTime = {
+				hour: 8,
+				minute: 0
+			};
+			http.post('/pages')
+			.auth(users[0].email, users[0].password)
+			.send(_data)
+			.expect(200, function(err, res) {
+				res.body.should.have.property('id');
+				res.body.expectFetchTime.hour.should.equal(8);
+				res.body.expectFetchTime.minute.should.equal(0);
+				done();
+			});
+		});
+	});
+
+	context('expectFetchTime right 3', function() {
+		it('success', function(done) {
+			var _data = _.cloneDeep(data);
+			_data.expectFetchTime = {
+				hour: 0,
+				minute: 0
+			};
+			http.post('/pages')
+			.auth(users[0].email, users[0].password)
+			.send(_data)
+			.expect(200, function(err, res) {
+				res.body.should.have.property('id');
+				res.body.expectFetchTime.hour.should.equal(0);
+				res.body.expectFetchTime.minute.should.equal(0);
+				done();
+			});
+		});
+	});	
 });
