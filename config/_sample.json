@@ -40,5 +40,6 @@
 
 	"maxConcurrentCallsPerWorker": 10,
 
-	"registerGivenAmount": 1000
+	"registerGivenAmount": 5000,
+	"perLinkPrice": 3
 }

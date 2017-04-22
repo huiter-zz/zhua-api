@@ -3,8 +3,9 @@ const path = require('path');
 const config = require('config');
 const _ = require('lodash');
 const logger = require('../utils').getLogger('crontab');
+const Process = require('../model').Process;
 
-
+const cpuInfo = require('../utils').cpuInfo;
 const NODE_COMMAND = config.crontab.nodeCommand;
 const SHELL_COMMAND = config.crontab.shellCommand;
 const comment = 'zhua-page';
@@ -13,6 +14,23 @@ const execDir = path.join(__dirname, '../');
 if (!NODE_COMMAND || !SHELL_COMMAND) {
   throw new Error('need NODE_COMMAND and SHELL_COMMAND config');
 }
+
+const ensure = function () {
+  Process.findOneAndUpdate({
+      IPv4: cpuInfo.IPv4,
+      hostName: cpuInfo.hostName
+  }, {
+    status: 'free'
+  }).then(function(ret) {
+    if (ret) return true;
+    return Process.create({
+        IPv4: cpuInfo.IPv4,
+        hostName: cpuInfo.hostName
+    });
+  })
+};
+ensure();
+
 
 require('crontab').load(function(err, crontab) {
   if (err) {

@@ -1,56 +1,15 @@
 const workerFarm = require('worker-farm');
 const moment = require('moment');
 const workers    = workerFarm(require.resolve('../service/snapshot'));
-const os 		 = require('os');
+
 const Process = require('../model').Process;
 const logger = require('../utils').getLogger('snapshot');
-
-const cpuLen = os.cpus().length;
-
-const getMacIP = function () {
-	let IPv4,hostName;
-	hostName = os.hostname();
-	for(let i=0; i<os.networkInterfaces().en0.length; i++) {
-	    if(os.networkInterfaces().en0[i].family=='IPv4') {
-	        IPv4 = os.networkInterfaces().en0[i].address;
-	    }
-	}
-	return {IPv4: IPv4, hostName: hostName};
-}
-
-const getUbuntuIP = function () {
-	let IPv4,hostName;
-	hostName = os.hostname();
-	for(let i=0; i<os.networkInterfaces().eth0.length; i++){
-	    if(os.networkInterfaces().eth0[i].family=='IPv4'){
-	        IPv4 = os.networkInterfaces().eth0[i].address;
-	    }
-	}
-	return {IPv4: IPv4, hostName: hostName};
-}
-
-var info = getMacIP();
-if (!info.IPv4 || !info.hostName) {
-	info = getUbuntuIP();
-}
-
-const ensure = function () {
-	return Process.findOne({
-	    IPv4: info.IPv4,
-	    hostName: info.hostName
-	}).then(function(ret) {
-		if (ret) return true;
-		return Process.create({
-	    	IPv4: info.IPv4,
-	    	hostName: info.hostName
-		});
-	})
-};
+const cpuInfo = require('../utils').cpuInfo;
 
 const lock = function() {
 	return Process.update({
-	    IPv4: info.IPv4,
-	    hostName: info.hostName,
+	    IPv4: cpuInfo.IPv4,
+	    hostName: cpuInfo.hostName,
 	    status: 'free'
 	}, {
 	   	$set: {
@@ -67,8 +26,8 @@ const lock = function() {
 
 const unlock = function () {
 	return Process.update({
-	    IPv4: info.IPv4,
-	    hostName: info.hostName
+	    IPv4: cpuInfo.IPv4,
+	    hostName: cpuInfo.hostName
 	}, {
 	    $set: {
 	      	status: 'free'
@@ -83,13 +42,11 @@ const unlock = function () {
 };
 
 const main = function () {
-	ensure().then(function() {
-		return lock();
-	}).then(function() {
+	lock().then(function() {
 		var ret = 0;
-		for (var i = 0; i < cpuLen; i++) {
+		for (var i = 0; i < cpuInfo.cpuLen; i++) {
 			workers(function(err, outp) {
-				if (++ret === cpuLen) {
+				if (++ret === cpuInfo.cpuLen) {
 					workerFarm.end(workers);
 					return unlock().then(function() {
 						setTimeout(process.exit, 1000);

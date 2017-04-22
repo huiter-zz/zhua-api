@@ -16,7 +16,8 @@ const types = {
   uploadFile: 'uploadFile', // 上传文件
   cash: 'cash', // 现金充值
   gift: 'gift', // 赠送充值
-  adjust: 'adjust' // 调账，admin 角色用户拥有此日志记录
+  adjust: 'adjust', // 调账，admin 角色用户拥有此日志记录
+  consume: 'consume' // 消费
 };
 
 const typeArray = _.values(types);

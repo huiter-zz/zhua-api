@@ -11,7 +11,7 @@ const logger = utils.getLogger('user');
 const emailReg = /^([\w-_]+(?:\.[\w-_]+)*)@((?:[a-z0-9]+(?:-[a-zA-Z0-9]+)*)+\.[a-z]{2,6})(\.[a-z]{2,6})?$/i;
 const loginCookieExpireTime = 2 * 60 * 60 * 1000;
 const loginCookieExpireRememberTime = 30 * 24 * 60 * 60 * 1000;
-const registerGivenAmount = +config.registerGivenAmount || 1000; // 注册后赠送的充值金额
+const registerGivenAmount = +config.registerGivenAmount || 5000; // 注册后赠送的充值金额
 
 
 // 用户信息字段检查

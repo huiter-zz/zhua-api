@@ -1,6 +1,7 @@
 const config = require('config');
-var path = require('path');
-var filelogs = require('filelogs');
+const os     = require('os');
+const path = require('path');
+const filelogs = require('filelogs');
 
 /**
  * 生成一个 错误信息 对象
@@ -66,3 +67,37 @@ exports.getLogger = function(name){
   options.output = output;
   return filelogs(options);
 };
+
+
+
+const cpuLen = os.cpus().length;
+const getMacIP = function () {
+  let IPv4,hostName;
+  hostName = os.hostname();
+  for(let i=0; i<os.networkInterfaces().en0.length; i++) {
+      if(os.networkInterfaces().en0[i].family=='IPv4') {
+          IPv4 = os.networkInterfaces().en0[i].address;
+      }
+  }
+  return {IPv4: IPv4, hostName: hostName};
+}
+
+const getUbuntuIP = function () {
+  let IPv4,hostName;
+  hostName = os.hostname();
+  for(let i=0; i<os.networkInterfaces().eth0.length; i++){
+      if(os.networkInterfaces().eth0[i].family=='IPv4'){
+          IPv4 = os.networkInterfaces().eth0[i].address;
+      }
+  }
+  return {IPv4: IPv4, hostName: hostName};
+}
+
+var info = getMacIP();
+if (!info.IPv4 || !info.hostName) {
+  info = getUbuntuIP() || {};
+}
+
+info.cpuLen = cpuLen;
+
+exports.cpuInfo = info;

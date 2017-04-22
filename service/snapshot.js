@@ -6,6 +6,8 @@ const moment = require('moment');
 const qiniu = require("qiniu");
 const Page = require('../model').Page;
 const Snapshot = require('../model').Snapshot;
+const Property = require('../model').Property;
+const Log = require('../model').Log;
 const logger = require('../utils').getLogger('snapshot');
 const path = require('path');
 
@@ -22,6 +24,63 @@ const oneDayOneTimes = true; // 针对同一连接，一天只抓取一次（成
 qiniu.conf.ACCESS_KEY = config.qiniu.ACCESS_KEY;
 qiniu.conf.SECRET_KEY = config.qiniu.SECRET_KEY;
 var bucketname = config.qiniu.bucketname;
+const perLinkPrice = config.perLinkPrice || 3; // 每天每个连接扣费 3 分
+
+const consume = function *(uid, page, target) {
+	return Property.update({
+		user:uid,
+		gift: {
+			$gt: perLinkPrice
+		}
+	}, {
+		$inc: {
+			gift: -perLinkPrice
+		}
+	}).then(function(ret) {
+		if (!ret || !ret.n) {
+			return Property.update({
+				user:uid
+			}, {
+				$inc: {
+					cash: -perLinkPrice
+				}				
+			})
+		} else {
+			return 'success';
+		}
+	}).then(function(ret) {
+		if (ret === 'success') {
+			return Log.create({
+				user: uid,
+				type: Log.types('consume'),
+				data: {
+					page: page,
+					target: target,
+					gift: -perLinkPrice
+				}				
+			});
+			logger.info('扣费成功 %s page %s target %s', uid, page ,target);
+		} else if (ret && ret.n) {
+			return Log.create({
+				user: uid,
+				type: Log.types('consume'),
+				data: {
+					page: page,
+					target: target,
+					cash: -perLinkPrice
+				}				
+			})
+			logger.info('扣费成功 %s page %s target %s', uid, page ,target);
+		} else {
+			logger.warn('扣费异常 %s page %s target %s', uid, page ,target);
+			return null;
+		}
+	}).catch(function(err) {
+		logger.warn('扣费异常 %s page %s target %s error %s', uid, page ,target, err.message);
+		return err;
+	})
+}
+
 
 // 上传图片到 七牛
 const uploadFile = function (filename) {
@@ -111,6 +170,7 @@ const recurrence = function *(pid) {
 	if (!doc) {
 		return Promise.resolve('done');
 	}
+	let uid = doc.user;
 	try {
 		doc = doc.toJSON();
 		retryTimes = doc.retryTimes;
@@ -149,6 +209,12 @@ const recurrence = function *(pid) {
 					exception: true
 				}
 			});
+
+			// 扣费
+			try {
+				yield consume(uid, page, ret);
+			}catch(e){}
+
 			logger.info('进程 %s 抓取页面成功 id: %s page: %s url: %s', pid, id, page, ret);
 		}
 	} catch(err) {
