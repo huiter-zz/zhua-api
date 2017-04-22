@@ -74,10 +74,13 @@ const cpuLen = os.cpus().length;
 const getMacIP = function () {
   let IPv4,hostName;
   hostName = os.hostname();
-  for(let i=0; i<os.networkInterfaces().en0.length; i++) {
-      if(os.networkInterfaces().en0[i].family=='IPv4') {
-          IPv4 = os.networkInterfaces().en0[i].address;
-      }
+  var networkInterfaces = os.networkInterfaces();
+  if (networkInterfaces && networkInterfaces.en0 && networkInterfaces.en0.length) {
+    for(let i=0; i<os.networkInterfaces().en0.length; i++) {
+        if(os.networkInterfaces().en0[i].family=='IPv4') {
+            IPv4 = os.networkInterfaces().en0[i].address;
+        }
+    }
   }
   return {IPv4: IPv4, hostName: hostName};
 }
