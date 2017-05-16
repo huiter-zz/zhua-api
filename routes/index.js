@@ -14,12 +14,12 @@ router.get('/', function *(next) {
 	};
 });
 
-router.use('users', mountIP, users.routes());
+router.use('/users', mountIP, users.routes());
 
-router.use('pages', mountIP, pages.routes());
+router.use('/pages', mountIP, pages.routes());
 
-router.use('files', mountIP, files.routes());
+router.use('/files', mountIP, files.routes());
 
-router.use('admins', mountIP, admins.routes());
+router.use('/admins', mountIP, admins.routes());
 
 module.exports = router;
