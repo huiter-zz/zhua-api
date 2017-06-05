@@ -3,6 +3,9 @@ const Page = require('../model').Page;
 const Snapshot = require('../model').Snapshot;
 const Log = require('../model').Log;
 const errorWrapper = require('../utils').errorWrapper;
+const exec = require('child_process').exec;
+const worker = require('../service/worker');
+const path = require('path');
 
 const urlReg = /^((ht|f)tps?):\/\/[\w\-]+(\.[\w\-]+)+([\w\-\.,@?^=%&:\/~\+#]*[\w\-\@?^=%&\/~\+#])?$/;
 const tagArrayLengthLimit = 5;
@@ -103,6 +106,8 @@ const pageDataCheck = function *(data, isUpdate) {
 	return Promise.resolve(1);
 };
 
+const NODE_ENV = process.env.NODE_ENV || 'development';
+
 // 添加新页面
 exports.add = function *(next) {
 	let user = this.user;
@@ -125,6 +130,12 @@ exports.add = function *(next) {
 		ip: this.cleanIP,
 		data: data
 	});
+
+	let isFetching = yield worker.check();
+	if (!isFetching) {
+		let _pathDir = path.join(__dirname, '../crontab/zhuaPage');
+		exec('NODE_ENV=' + NODE_ENV + ' node ' + _pathDir);
+	}
 
     this.status = 200;
     this.body = page;
