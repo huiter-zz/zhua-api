@@ -1,3 +1,4 @@
+const fs = require('fs');
 const config = require('config');
 const co = require('co');
 const Pageres = require('pageres');
@@ -10,6 +11,7 @@ const Property = require('../model').Property;
 const Log = require('../model').Log;
 const logger = require('../utils').getLogger('snapshot');
 const path = require('path');
+const errorWrapper = require('../utils').errorWrapper;
 
 const maxConcurrentCallsPerWorker = config.maxConcurrentCallsPerWorker || 1;
 const RETRY_TIME = 3; // 重试次数
@@ -88,6 +90,23 @@ const uploadFile = function (filename) {
 	let uptoken = putPolicy.token();
 	let extra = new qiniu.io.PutExtra();
 	let localFile = path.join(__dirname, '../snapshot/' + filename);
+	try {
+		let statObj = fs.statSync(localFile);
+		if (!statObj || statObj.size < 1000) {
+			logger.warn('图片数据获取错误 %s', localFile);		
+			return Promise.reject(errorWrapper({
+				errcode: 40081,
+				errmsg: '图片数据获取错误'
+			}));
+		}
+	} catch (e) {
+		logger.warn('图片不存在 %s error %s', localFile, e.message);
+		console.log(e);		
+		return Promise.reject(errorWrapper({
+			errcode: 40081,
+			errmsg: '图片不存在'
+		}));
+	}
 	return new Promise(function(resolve, reject) {
 		qiniu.io.putFile(uptoken, filename, localFile, extra, function(err, ret) {
 			/* istanbul ignore if */
