@@ -7,7 +7,7 @@ const url = 'http://www.smartisan.com';
 const setting = {};
 
 const main = function () {
-        let size = _.isEmpty(setting.size) ? ['1024x768'] : setting.size;
+        let size = _.isEmpty(setting.size) ? ['2048x768'] : setting.size;
         let options = {
                 delay: +setting.delay || 1
         };
