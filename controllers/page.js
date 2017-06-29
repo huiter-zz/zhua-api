@@ -224,7 +224,13 @@ exports.list = function *(next) {
 	    try {
 	     	_reg = new RegExp(keyword, 'i');
 	    }catch(e){ log.warn('keyword %s invalid'); }
-	    if (_reg) query.tags = _reg;
+	    if (_reg) {
+	    	query['$or'] = [
+	    		{tags: _reg},
+	    		{title: _reg},
+	    		{page: _reg}
+	    	]
+	    }
 	}
 
 	let pages = yield Page.find(query).skip((page - 1) * count).limit(count).sort({createdTime:-1}).exec();
