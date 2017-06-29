@@ -144,9 +144,13 @@ const fetch = function *(filename, url, setting) {
 		.then(function(ret) {
 			return filename;
 		});
-
+		
 	let qiniuUrl = yield uploadFile(filename + '.png');
- 	return Promise.resolve(qiniuUrl);
+    return new Promise(function(resolve, reject) {
+    	setTimeout(function() {
+	 		return resolve(qiniuUrl);
+    	}, 1500);
+    })
 }
 
 // 递归抓取页面并保存快照
