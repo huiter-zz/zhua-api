@@ -196,7 +196,7 @@ exports.add = function *(next) {
 	});
 
 	page = page.toJSON ? page.toJSON() : page;
-	fetch(page);
+	yield fetch(page);
 
     this.status = 200;
     this.body = page;
