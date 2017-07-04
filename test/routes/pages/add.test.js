@@ -7,7 +7,7 @@ const _ = require('lodash');
 const users = fixtures.user;
 const logs = fixtures.log;
 var data = {
-	page: 'http://www.zhua.pm',
+	page: 'http://www.baidu.com',
 	title: 'zhua',
 	tags: ['抓页面'],
 	setting: {

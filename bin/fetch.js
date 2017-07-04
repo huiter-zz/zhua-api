@@ -3,7 +3,7 @@ const path = require('path');
 const Pageres = require('pageres');
 
 
-const url = 'http://www.smartisan.com';
+const url = 'https://zhua.pm';
 const setting = {};
 
 const main = function () {

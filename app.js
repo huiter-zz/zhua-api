@@ -119,7 +119,7 @@ app.use(router.routes(), router.allowedMethods());
 // response
 
 app.on('error', function(err, ctx){
-	loggerFile.error('server response error message %s', err.message);
+	loggerFile.error('server response error message %s', err.stack);
 });
 
 module.exports = app;

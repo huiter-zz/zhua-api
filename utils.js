@@ -80,17 +80,18 @@ exports.uploadFile = function (filename) {
   let localFile = path.join(__dirname, './snapshot/' + filename);
   try {
     let statObj = fs.statSync(localFile);
+    console.log(statObj);
     if (!statObj || statObj.size < 30 * 1000) {
-      logger.warn('图片数据获取错误 %s', localFile);    
-      return Promise.reject(errorWrapper({
+      console.error('图片数据获取错误 %s', localFile);    
+      return Promise.reject(exports.errorWrapper({
         errcode: 40081,
         errmsg: '图片数据获取错误'
       }));
     }
   } catch (e) {
-    logger.warn('图片不存在 %s error %s', localFile, e.message);
+    console.error('图片不存在 %s error %s', localFile, e.message);
     console.log(e);   
-    return Promise.reject(errorWrapper({
+    return Promise.reject(exports.errorWrapper({
       errcode: 40081,
       errmsg: '图片不存在'
     }));
@@ -102,7 +103,7 @@ exports.uploadFile = function (filename) {
         var imageURL = config.qiniu.domain + filename;
         resolve(imageURL);
       } else if (err) {
-        reject(errorWrapper({
+        reject(exports.errorWrapper({
           errcode: 40081,
           errmsg: '上传文件失败，请重新上传'
         }));
