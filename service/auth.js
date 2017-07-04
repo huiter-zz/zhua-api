@@ -43,7 +43,6 @@ module.exports = function *(next) {
         return yield next;
     } else {
         let session = yield this.session;
-        console.log(session);
         if (!session || !session.uid) {
             this.status = 401;
             this.body = {
