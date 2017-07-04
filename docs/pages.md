@@ -201,3 +201,16 @@
 		]
 	}
 ```
+
+### 重新抓取页面
+
+```
+	POST /pages/:id/fetch/snapshots
+```
+
+`返回值:`
+
+```
+	{url: 'http://oj54bwg6q.bkt.clouddn.com/585f758acb9c00775aabcef1_20170704.png'}
+```
+* 返回七牛存储连接

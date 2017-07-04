@@ -1,4 +1,5 @@
 const fs = require('fs');
+const path = require('path');
 const config = require('config');
 const co = require('co');
 const Pageres = require('pageres');
@@ -9,9 +10,10 @@ const Page = require('../model').Page;
 const Snapshot = require('../model').Snapshot;
 const Property = require('../model').Property;
 const Log = require('../model').Log;
-const logger = require('../utils').getLogger('snapshot');
-const path = require('path');
-const errorWrapper = require('../utils').errorWrapper;
+const utils = require('../utils');
+const logger = utils.getLogger('snapshot');
+const errorWrapper = utils.errorWrapper;
+const uploadFile = utils.uploadFile;
 
 const maxConcurrentCallsPerWorker = config.maxConcurrentCallsPerWorker || 1;
 const RETRY_TIME = 3; // 重试次数
@@ -83,49 +85,6 @@ const consume = function *(uid, page, target) {
 	})
 }
 
-
-// 上传图片到 七牛
-const uploadFile = function (filename) {
-	let putPolicy = new qiniu.rs.PutPolicy(bucketname);
-	let uptoken = putPolicy.token();
-	let extra = new qiniu.io.PutExtra();
-	let localFile = path.join(__dirname, '../snapshot/' + filename);
-	try {
-		let statObj = fs.statSync(localFile);
-		if (!statObj || statObj.size < 1000) {
-			logger.warn('图片数据获取错误 %s', localFile);		
-			return Promise.reject(errorWrapper({
-				errcode: 40081,
-				errmsg: '图片数据获取错误'
-			}));
-		}
-	} catch (e) {
-		logger.warn('图片不存在 %s error %s', localFile, e.message);
-		console.log(e);		
-		return Promise.reject(errorWrapper({
-			errcode: 40081,
-			errmsg: '图片不存在'
-		}));
-	}
-	return new Promise(function(resolve, reject) {
-		qiniu.io.putFile(uptoken, filename, localFile, extra, function(err, ret) {
-			/* istanbul ignore if */
-			if (err && err.code === 614 && err.error === 'file exists') {
-				var imageURL = config.qiniu.domain + filename;
-				resolve(imageURL);
-			} else if (err) {
-				reject(errorWrapper({
-					errcode: 40081,
-					errmsg: '上传文件失败，请重新上传'
-				}));
-			} else {
-				var imageURL = config.qiniu.domain + filename;
-				resolve(imageURL);
-			}
-		});
-	});
-};
-
 const fetch = function *(filename, url, setting) {
 	setting = setting || {};
 	let size = _.isEmpty(setting.size) ? ['1024x768'] : setting.size;
@@ -138,19 +97,14 @@ const fetch = function *(filename, url, setting) {
 		timeout: 120,
 		format: 'png'
 	});
-	yield pageres.src(url, size, options)
+	let ret = yield pageres.src(url, size, options)
 		.dest(path.join(__dirname, '../snapshot'))
 		.run()
 		.then(function(ret) {
-			return filename;
+			return uploadFile(filename + '.png');
 		});
-		
-	let qiniuUrl = yield uploadFile(filename + '.png');
-    return new Promise(function(resolve, reject) {
-    	setTimeout(function() {
-	 		return resolve(qiniuUrl);
-    	}, 1500);
-    })
+
+	return ret;
 }
 
 // 递归抓取页面并保存快照

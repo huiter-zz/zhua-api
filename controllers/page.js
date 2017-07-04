@@ -1,11 +1,14 @@
 const _ = require('lodash');
+const moment = require('moment');
+const Pageres = require('pageres');
 const Page = require('../model').Page;
 const Snapshot = require('../model').Snapshot;
 const Log = require('../model').Log;
-const errorWrapper = require('../utils').errorWrapper;
-const exec = require('child_process').exec;
-const worker = require('../service/worker');
 const path = require('path');
+const utils = require('../utils');
+const errorWrapper = utils.errorWrapper;
+const uploadFile = utils.uploadFile;
+const logger = utils.getLogger('pageCtrl');
 
 const urlReg = /^((ht|f)tps?):\/\/[\w\-]+(\.[\w\-]+)+([\w\-\.,@?^=%&:\/~\+#]*[\w\-\@?^=%&\/~\+#])?$/;
 const tagArrayLengthLimit = 5;
@@ -108,6 +111,66 @@ const pageDataCheck = function *(data, isUpdate) {
 
 const NODE_ENV = process.env.NODE_ENV || 'development';
 
+const successLockTime = 2; // 抓取成功后锁定几小时后才能再次抓取
+
+const fetch = function *(data) {
+	let nowTime = Date.now();
+	let todayEndTime = moment().endOf('day').valueOf();
+	let setting = data.setting || {};
+	let size = _.isEmpty(setting.size) ? ['1024x768'] : setting.size;
+	let options = {
+		delay: +setting.delay || 1
+	};
+	options.filename = data.id + '_' + moment().format('YYYYMMDD');
+	logger.info('start fetch page %s', data.page)
+	const pageres = new Pageres({
+		delay: 1,
+		timeout: 120,
+		format: 'png'
+	});
+
+	let ret = yield pageres.src(data.page, size, options)
+		.dest(path.join(__dirname, '../snapshot'))
+		.run()
+		.then(function(ret) {
+			logger.info('save image file to qiniu %s', options.filename);
+			return uploadFile(options.filename + '.png');
+		});
+
+	if (ret === 'failure') {
+		logger.error('抓取页面失败 id: %s page: %s', data.id, data.page);
+		throw new Error('failure');
+	} else {
+		// 记录快照 url
+		yield Snapshot.create({
+			pid: data.id,
+			url: ret,
+			createdTime: nowTime
+		});
+		// 修改 page 状态
+		let nextCanFetchTime = moment().add(successLockTime, 'hours').valueOf();
+		if (todayEndTime < nextCanFetchTime) {
+			nextCanFetchTime = todayEndTime + 1;
+		}
+		yield Page.findOneAndUpdate({
+			_id: data.id
+		}, {
+			$set: {
+				status: 'normal',
+				image: ret,
+				lastFetchTime: Date.now(),
+				canFetchTime: nextCanFetchTime,
+				retryTimes: 0
+			},
+			$unset: {
+				exception: true
+			}
+		});
+		logger.info('抓取页面成功 id: %s page: %s url: %s', data.id, data.page, ret);
+	}
+	return ret;
+}
+
 // 添加新页面
 exports.add = function *(next) {
 	let user = this.user;
@@ -122,6 +185,7 @@ exports.add = function *(next) {
 	if (data.setting && data.setting.size) {
 		data.setting.size = _.isString(data.setting.size) ? [data.setting.size] : data.setting.size;
 	}
+	data.status = 'fetching';
 	let page = yield Page.create(data);
 
 	Log.create({
@@ -131,11 +195,8 @@ exports.add = function *(next) {
 		data: data
 	});
 
-	let isFetching = yield worker.check();
-	if (!isFetching) {
-		let _pathDir = path.join(__dirname, '../crontab/zhuaPage');
-		exec('NODE_ENV=' + NODE_ENV + ' node ' + _pathDir);
-	}
+	page = page.toJSON ? page.toJSON() : page;
+	fetch(page);
 
     this.status = 200;
     this.body = page;
@@ -324,3 +385,40 @@ exports.listSnapshot = function *(next) {
 	this.body = {data: data, total: total};
 	return;
 };
+
+// 重新获取快照
+exports.fetchSnapshot = function *(next) {
+	let user = this.user;
+	let pid = this.params.id;
+
+	let page = null;
+	try {
+		page = yield Page.findOneAndUpdate({
+			user: user._id,
+			_id: pid,
+			del: false
+		}, {
+			$set: {
+				status: 'fetching'
+			}
+		});
+	} catch(e){}
+
+	if (!page) {
+		this.status = 400;
+        this.body = errorWrapper({
+            errcode: 40024,
+            errmsg: '页面不存在'
+        });
+        return;
+	}
+
+	page = page.toJSON();
+	let url = yield fetch(page);
+
+	this.status = 200;
+	this.body = {
+		url: url
+	};
+	return;
+}

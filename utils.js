@@ -1,7 +1,9 @@
+const fs = require('fs');
 const config = require('config');
 const os     = require('os');
 const path = require('path');
 const filelogs = require('filelogs');
+const qiniu = require('qiniu');
 
 /**
  * 生成一个 错误信息 对象
@@ -68,6 +70,49 @@ exports.getLogger = function(name){
   return filelogs(options);
 };
 
+qiniu.conf.ACCESS_KEY = config.qiniu.ACCESS_KEY;
+qiniu.conf.SECRET_KEY = config.qiniu.SECRET_KEY;
+const bucketname = config.qiniu.bucketname;
+exports.uploadFile = function (filename) {
+  let putPolicy = new qiniu.rs.PutPolicy(bucketname);
+  let uptoken = putPolicy.token();
+  let extra = new qiniu.io.PutExtra();
+  let localFile = path.join(__dirname, './snapshot/' + filename);
+  try {
+    let statObj = fs.statSync(localFile);
+    if (!statObj || statObj.size < 30 * 1000) {
+      logger.warn('图片数据获取错误 %s', localFile);    
+      return Promise.reject(errorWrapper({
+        errcode: 40081,
+        errmsg: '图片数据获取错误'
+      }));
+    }
+  } catch (e) {
+    logger.warn('图片不存在 %s error %s', localFile, e.message);
+    console.log(e);   
+    return Promise.reject(errorWrapper({
+      errcode: 40081,
+      errmsg: '图片不存在'
+    }));
+  }
+  return new Promise(function(resolve, reject) {
+    qiniu.io.putFile(uptoken, filename, localFile, extra, function(err, ret) {
+      /* istanbul ignore if */
+      if (err && err.code === 614 && err.error === 'file exists') {
+        var imageURL = config.qiniu.domain + filename;
+        resolve(imageURL);
+      } else if (err) {
+        reject(errorWrapper({
+          errcode: 40081,
+          errmsg: '上传文件失败，请重新上传'
+        }));
+      } else {
+        var imageURL = config.qiniu.domain + filename;
+        resolve(imageURL);
+      }
+    });
+  });  
+}
 
 
 const cpuLen = os.cpus().length;

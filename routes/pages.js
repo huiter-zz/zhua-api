@@ -18,4 +18,7 @@ router.delete('/:id', auth, pageCtrl.remove);
 // 获取某页面快照列表
 router.get('/:id/snapshots', auth, pageCtrl.listSnapshot);
 
+// 重新获取快照
+router.post('/:id/fetch/snapshots', auth, pageCtrl.fetchSnapshot)
+
 module.exports = router;
