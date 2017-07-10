@@ -3,7 +3,7 @@ const path = require('path');
 const Pageres = require('pageres');
 
 
-const url = 'https://zhua.pm';
+const url = 'https://antv.alipay.com/index.html';
 const setting = {};
 
 const main = function () {

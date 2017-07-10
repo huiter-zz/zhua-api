@@ -129,15 +129,22 @@ const fetch = function *(data) {
 		format: 'png'
 	});
 
-	let ret = yield pageres.src(data.page, size, options)
-		.dest(path.join(__dirname, '../snapshot'))
-		.run()
-		.then(function(ret) {
-			logger.info('save image file to qiniu %s', options.filename);
-			return uploadFile(options.filename + '.png');
-		});
+	let ret = null;
 
-	if (ret === 'failure') {
+	try {
+		ret = yield pageres.src(data.page, size, options)
+				.dest(path.join(__dirname, '../snapshot'))
+				.run()
+				.then(function(ret) {
+					logger.info('save image file to qiniu %s', options.filename);
+					return uploadFile(options.filename + '.png');
+				});		
+	} catch(e) {
+		console.log(e);
+	}
+
+
+	if (!ret || ret === 'failure') {
 		logger.error('抓取页面失败 id: %s page: %s', data.id, data.page);
 		throw new Error('failure');
 	} else {
