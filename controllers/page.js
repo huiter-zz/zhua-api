@@ -129,7 +129,7 @@ const fetch = function *(data) {
 		format: 'png'
 	});
 
-	let ret = null;
+	let ret = null, err;
 
 	try {
 		ret = yield pageres.src(data.page, size, options)
@@ -141,12 +141,23 @@ const fetch = function *(data) {
 				});		
 	} catch(e) {
 		console.log(e);
+		err = e;
 	}
 
 
 	if (!ret || ret === 'failure') {
 		logger.error('抓取页面失败 id: %s page: %s', data.id, data.page);
-		throw new Error('failure');
+		yield Page.findOneAndUpdate({
+			_id: data.id
+		}, {
+			$set: {
+				status: 'exception',
+				retryTimes: 0,
+				exception: {
+					info: err && err.message || ret
+				}
+			}
+		});
 	} else {
 		// 记录快照 url
 		yield Snapshot.create({
