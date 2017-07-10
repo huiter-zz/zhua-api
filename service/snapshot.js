@@ -16,9 +16,9 @@ const errorWrapper = utils.errorWrapper;
 const uploadFile = utils.uploadFile;
 
 const maxConcurrentCallsPerWorker = config.maxConcurrentCallsPerWorker || 1;
-const RETRY_TIME = 3; // 重试次数
-const failureLockTime = 6; // 抓取失败后锁定几小时后才能再次抓取
-const successLockTime = 2; // 抓取成功后锁定几小时后才能再次抓取
+const RETRY_TIME = config.RETRY_TIME || 3; // 重试次数
+const failureLockTime = config.failureLockTime || 0.5; // 抓取失败后锁定几小时后才能再次抓取
+const successLockTime = config.successLockTime || 2; // 抓取成功后锁定几小时后才能再次抓取
 const nextDayClearLock = true; // 第二天后清除所有锁定 
 const oneDayOneTimes = true; // 针对同一连接，一天只抓取一次（成功抓取到图片）
 

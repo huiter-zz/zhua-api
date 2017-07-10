@@ -1,7 +1,7 @@
 const workerFarm = require('worker-farm');
 const moment = require('moment');
 const workers    = workerFarm(require.resolve('./snapshot'));
-
+const Page = require('../model').Page;
 const Process = require('../model').Process;
 const logger = require('../utils').getLogger('snapshot');
 const cpuInfo = require('../utils').cpuInfo;
@@ -56,17 +56,23 @@ const check = function () {
 
 const main = function () {
 	lock().then(function() {
-		var ret = 0;
-		for (var i = 0; i < cpuInfo.cpuLen; i++) {
-			workers(function(err, outp) {
-				if (++ret === cpuInfo.cpuLen) {
-					workerFarm.end(workers);
-					return unlock().then(function() {
-						setTimeout(process.exit, 1000);
-					});
-				}
-			});
-		}
+		Page.update({
+			status: 'fetching'
+		}, {
+			status: 'normal'
+		}, {multi: true}, function() {
+			var ret = 0;
+			for (var i = 0; i < cpuInfo.cpuLen; i++) {
+				workers(function(err, outp) {
+					if (++ret === cpuInfo.cpuLen) {
+						workerFarm.end(workers);
+						return unlock().then(function() {
+							setTimeout(process.exit, 1000);
+						});
+					}
+				});
+			}
+		});
 	}).catch(function() {
 		logger.warn('执行进程未空闲，等待下一次执行');
 		setTimeout(process.exit, 1000);
