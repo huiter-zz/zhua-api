@@ -81,7 +81,7 @@ exports.uploadFile = function (filename) {
   try {
     let statObj = fs.statSync(localFile);
     console.log(statObj);
-    if (!statObj || statObj.size < 30 * 1000) {
+    if (!statObj || statObj.size < 10 * 1000) {
       console.error('图片数据获取错误 %s', localFile);    
       return Promise.reject(exports.errorWrapper({
         errcode: 40081,
