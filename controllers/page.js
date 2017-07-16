@@ -214,7 +214,9 @@ exports.add = function *(next) {
 	});
 
 	page = page.toJSON ? page.toJSON() : page;
-	yield fetch(page);
+	
+	//改为异步抓取
+	fetch(page);
 
     this.status = 200;
     this.body = page;
