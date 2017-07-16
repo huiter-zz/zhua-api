@@ -215,8 +215,8 @@ exports.add = function *(next) {
 
 	page = page.toJSON ? page.toJSON() : page;
 	
-	//改为异步抓取
-	fetch(page);
+	//改为同步抓取
+	yield fetch(page);
 
     this.status = 200;
     this.body = page;
