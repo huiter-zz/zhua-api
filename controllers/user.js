@@ -142,6 +142,7 @@ exports.register = function *(next) {
 	}
 
 	let user = yield User.create(data);
+
 	Log.create({
 		user: user._id,
 		type: Log.types('register'),
@@ -152,6 +153,27 @@ exports.register = function *(next) {
 	yield initUserProperty(user._id);
 	// 充值
 	yield updateProperty(user._id, 'gift', registerGivenAmount, this.cleanIP, 'register');
+
+	// 返回 User 对象
+	user = user.toJSON();
+	user.loginTime = Date.now();
+	user.lastLoginTime = user.loginTime;
+	this.session.uid = user.uid,
+	this.session.loginTime = user.loginTime;
+	this.session.lastLoginTime = user.lastLoginTime;
+	this.session.cookie.maxAge = loginCookieExpireTime;
+
+	let property = yield Property.findOne({user: user.uid});
+
+	user.property = {
+		cash: property && property.cash || 0,
+		gift: property && property.gift || 0
+	};
+	let pageCount = yield Page.count({user: user.uid, del: false});
+	user.pageCount = pageCount || 0;
+	if (!user.avatar) { // 默认头像
+		user.avatar = 'https://omojllq5i.qnssl.com/a3192a39aeafe019159395b18f940e03.png';
+	}
 
     this.status = 200;
     this.body = user;
