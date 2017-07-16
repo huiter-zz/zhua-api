@@ -223,7 +223,7 @@ exports.login = function *(next) {
 	let pageCount = yield Page.count({user: user.uid, del: false});
 	user.pageCount = pageCount || 0;
 	if (!user.avatar) { // 默认头像
-		user.avatar = 'https://oj54bwg6q.bkt.clouddn.com/a3192a39aeafe019159395b18f940e03.png';
+		user.avatar = 'https://omojllq5i.qnssl.com/a3192a39aeafe019159395b18f940e03.png';
 	}
 	this.status = 200;
 	this.body = user;
@@ -238,7 +238,7 @@ exports.getInfo = function *(next) {
 	user.loginTime = session.loginTime;
 	user.lastLoginTime = session.lastLoginTime;
 	if (!user.avatar) { // 默认头像
-		user.avatar = 'http://oj54bwg6q.bkt.clouddn.com/a3192a39aeafe019159395b18f940e03.png';
+		user.avatar = 'https://omojllq5i.qnssl.com/a3192a39aeafe019159395b18f940e03.png';
 	}
 	let property = yield Property.findOne({user: user.uid});
 	user.property = {
