@@ -1,6 +1,7 @@
 const _ = require('lodash');
 const moment = require('moment');
 const Pageres = require('pageres');
+const co = require('co');
 const Page = require('../model').Page;
 const Snapshot = require('../model').Snapshot;
 const Log = require('../model').Log;
@@ -140,6 +141,7 @@ const fetch = function *(data) {
 					return uploadFile(options.filename + '.png');
 				});		
 	} catch(e) {
+		logger.error('fetch image error %s', e.message);
 		console.log(e);
 		err = e;
 	}
@@ -189,6 +191,12 @@ const fetch = function *(data) {
 	return ret;
 }
 
+const fetchPage = function (data) {
+	co(function *() {
+		yield fetch(data);
+	})
+}
+
 // 添加新页面
 exports.add = function *(next) {
 	let user = this.user;
@@ -216,7 +224,7 @@ exports.add = function *(next) {
 	page = page.toJSON ? page.toJSON() : page;
 	
 	//改为同步抓取
-	yield fetch(page);
+	fetchPage(page);
 
     this.status = 200;
     this.body = page;

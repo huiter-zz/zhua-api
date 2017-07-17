@@ -80,7 +80,6 @@ exports.uploadFile = function (filename) {
   let localFile = path.join(__dirname, './snapshot/' + filename);
   try {
     let statObj = fs.statSync(localFile);
-    console.log(statObj);
     if (!statObj || statObj.size < 10 * 1000) {
       console.error('图片数据获取错误 %s', localFile);    
       return Promise.reject(exports.errorWrapper({

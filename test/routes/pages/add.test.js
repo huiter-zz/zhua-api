@@ -3,6 +3,7 @@
 
 const fixtures = require('../../load_fixtures');
 const Log = require('../../../model').Log;
+const Page = require('../../../model').Page;
 const _ = require('lodash');
 const users = fixtures.user;
 const logs = fixtures.log;
@@ -179,6 +180,7 @@ describe('POST /pages', function() {
 			.expect(200, function(err, res) {
 				res.body.should.have.property('id');
 				res.body.page.should.equal(_data.page);
+				res.body.status.should.equal('fetching');
 				setTimeout(function() {
 					Log.find({
 						user: users[0]._id,
@@ -188,9 +190,16 @@ describe('POST /pages', function() {
 							return item.user === users[0]._id && item.type === Log.types('addPage');
 						})
 						docs.length.should.equal(_logs.length + 1);
-						done();
+						Page.findOne({
+							_id: res.body.id
+						}, function(err, doc) {
+							console.log(doc);
+							doc.status.should.equal('normal');
+							doc.image.indexOf('http://oj54bwg6q.bkt.clouddn.com/').should.equal(0);
+							done();
+						})
 					});
-				}, 300);
+				}, 8000);
 			});
 		});
 	});
