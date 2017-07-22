@@ -247,6 +247,7 @@ exports.login = function *(next) {
 	if (!user.avatar) { // 默认头像
 		user.avatar = 'https://omojllq5i.qnssl.com/a3192a39aeafe019159395b18f940e03.png';
 	}
+	user.access_token = this.sessionId;
 	this.status = 200;
 	this.body = user;
 	return;

@@ -10,6 +10,7 @@ const utils = require('../utils');
 const errorWrapper = utils.errorWrapper;
 const uploadFile = utils.uploadFile;
 const logger = utils.getLogger('pageCtrl');
+const wsServer = require('../service/ws');
 
 const urlReg = /^((ht|f)tps?):\/\/[\w\-]+(\.[\w\-]+)+([\w\-\.,@?^=%&:\/~\+#]*[\w\-\@?^=%&\/~\+#])?$/;
 const tagArrayLengthLimit = 5;
@@ -191,9 +192,22 @@ const fetch = function *(data) {
 	return ret;
 }
 
-const fetchPage = function (data) {
+const fetchPage = function (uid, data) {
 	co(function *() {
-		yield fetch(data);
+		let ret = yield fetch(data);
+		if (!ret || ret === 'failure') {
+			wsServer.send(uid, {
+				status: 'failure',
+				id: data.id,
+				page: data.page
+			})
+		} else {
+			wsServer.send(uid, {
+				status: 'success',
+				id: data.id,
+				page: data.page
+			})
+		}
 	})
 }
 
@@ -223,8 +237,9 @@ exports.add = function *(next) {
 
 	page = page.toJSON ? page.toJSON() : page;
 	
+	let uid = user._id.toString();
 	//改为同步抓取
-	fetchPage(page);
+	fetchPage(uid, page);
 
     this.status = 200;
     this.body = page;

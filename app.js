@@ -9,7 +9,6 @@ const _ = require('lodash');
 const config = require('config');
 const loggerFile =  require('./utils').getLogger('error');
 const session = require('koa-generic-session');
-const MongoStore = require('koa-generic-session-mongo');
 
 // middlewares
 app.use(require('koa-bodyparser')());
@@ -18,19 +17,13 @@ app.use(logger());
 
 app.keys = ['TFyhw0lTx5YKKhUloJ1Dzr48', 'zhua-page'];
 app.use(session({
-  store: new MongoStore({
-  	db: config.mongodb.database,
-  	collection: 'sessions',
-  	host: config.mongodb.host,
-  	port: config.mongodb.port || 27017,
-  	user: config.mongodb.user,
-  	password: config.mongodb.password,
-  }),
-  key: 'zhua.sid',
-  cookie: {
-  	maxAge: 2 * 60 * 60 * 1000,
-  	signed: false
-  }
+	prefix: config.prefix || 'zhua:sess:',
+  	store: require('./service/session-store'),
+  	key: 'zhua.sid',
+  	cookie: {
+  		maxAge: 2 * 60 * 60 * 1000,
+  		signed: false
+  	}
 }));
 
 var isString = function (s) {
