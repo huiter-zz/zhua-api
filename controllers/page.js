@@ -197,15 +197,17 @@ const fetchPage = function (uid, data) {
 		let ret = yield fetch(data);
 		if (!ret || ret === 'failure') {
 			wsServer.send(uid, {
-				status: 'failure',
+				status: 'exception',
 				id: data.id,
-				page: data.page
+				page: data.page,
+
 			})
 		} else {
 			wsServer.send(uid, {
-				status: 'success',
+				status: 'normal',
 				id: data.id,
-				page: data.page
+				page: data.page,
+				url:ret
 			})
 		}
 	})
