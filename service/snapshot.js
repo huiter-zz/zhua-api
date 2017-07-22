@@ -14,6 +14,7 @@ const utils = require('../utils');
 const logger = utils.getLogger('snapshot');
 const errorWrapper = utils.errorWrapper;
 const uploadFile = utils.uploadFile;
+const WebSocketServer = require('ws').Server;
 
 const maxConcurrentCallsPerWorker = config.maxConcurrentCallsPerWorker || 1;
 const RETRY_TIME = config.RETRY_TIME || 3; // 重试次数
@@ -21,6 +22,12 @@ const failureLockTime = config.failureLockTime || 0.5; // 抓取失败后锁定�
 const successLockTime = config.successLockTime || 2; // 抓取成功后锁定几小时后才能再次抓取
 const nextDayClearLock = true; // 第二天后清除所有锁定 
 const oneDayOneTimes = true; // 针对同一连接，一天只抓取一次（成功抓取到图片）
+
+var wss = new WebSocketServer({port: 2555});
+wss.on('connection', function(ws, req) {
+  console.log('connection');
+});
+
 
 /**
  * 上传图片到七牛
@@ -191,6 +198,17 @@ const recurrence = function *(pid) {
 			try {
 				yield consume(uid, page, ret);
 			}catch(e){}
+
+			wss.clients.forEach(function(ws) {
+				ws.send({
+					id:id,
+					status: 'normal',
+					image: ret,
+					lastFetchTime: Date.now(),
+					canFetchTime: nextCanFetchTime,
+					retryTimes: 0
+				});
+			})
 
 			logger.info('进程 %s 抓取页面成功 id: %s page: %s url: %s', pid, id, page, ret);
 		}
