@@ -18,7 +18,8 @@
   	"crontab": {
     	"nodeCommand": "NODE_ENV=development /usr/local/bin/node",
 	    "shellCommand": "/bin/bash",
-    	"logTidy": "10 0 * * *"
+    	"logTidy": "10 0 * * *",
+    	"removeSnapshot": "* */1 * * *"
   	},
 
 
